@@ -1,5 +1,7 @@
 [versions]
 agp = "8.5.1"
+arcgisAndroid = "100.12.0"
+arcgisAndroidVersion = "100.14.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
