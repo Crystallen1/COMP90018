@@ -55,5 +55,5 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("com.google.android.material:material:1.6.1")
-    implementation("com.esri.arcgisruntime:arcgis-android:100.15.6")
+    implementation ("com.google.android.gms:play-services-maps:18.0.2")
 }
