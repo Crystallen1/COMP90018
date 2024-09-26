@@ -17,6 +17,13 @@ public class Journey {
         this.dateTime = dateTime;
     }
 
+    public Journey(String name, String notes, double latitude, double longitude) {
+        this.name = name;
+        this.notes = notes;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     public Journey() {
     }
 

@@ -1,5 +1,6 @@
 package com.comp90018.comp90018.ui.map;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.comp90018.comp90018.R;
+import com.comp90018.comp90018.model.Journey;
+import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,8 +36,7 @@ public class MapFragment extends Fragment {
     private LocationService locationService;
     private Marker currentLocationMarker;
 
-    private ArrayList<LatLng> locations = new ArrayList<>(); // 地理位置列表
-    private ArrayList<String> infoList = new ArrayList<>();  // 对应的信息列表
+    private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
 
     @Nullable
@@ -82,11 +84,9 @@ public class MapFragment extends Fragment {
         locationService = new LocationService(requireContext());
         Log.d("MapFragment", "LocationService initialized");
         // 添加一些示例位置和信息
-        locations.add(new LatLng(-37.8136, 144.9631)); // 墨尔本
-        infoList.add("这是墨尔本的位置，显示一些额外信息...");
+        journeys.add(new Journey("place1","这是墨尔本的位置，显示一些额外信息..",-37.8136, 144.9631)); // 墨尔本
 
-        locations.add(new LatLng(-37.9285, 144.1631)); // 阿德莱德
-        infoList.add("这是阿德莱德的位置，更多详细信息可以在这里显示...");
+//        journeys.add(new Journey("place2","这是阿德莱德的位置，更多详细信息可以在这里显示...",-37.8285, 144.9641)); // 墨尔本
 
 
         return rootView;
@@ -137,18 +137,53 @@ public class MapFragment extends Fragment {
     }
     // 将位置添加到地图上
     private void addLocationsToMap() {
-        for (int i = 0; i < locations.size(); i++) {
-            LatLng location = locations.get(i);
-            String info = infoList.get(i);
+        GPTService gptService = new GPTService();
 
-            // 添加标记
+        for (int i = 0; i < journeys.size(); i++) {
+            LatLng location = new LatLng(journeys.get(i).getLatitude(),journeys.get(i).getLongitude());
+            String name = journeys.get(i).getName();
+            String notes = journeys.get(i).getNotes();
+            new FetchJourneyInfoTask(name, notes, location).execute();
+//            String generatedInfo = gptService.getJourneyIntroduction(name, notes);
+//
+//
+//            // 添加标记
+//            Marker marker = googleMap.addMarker(new MarkerOptions()
+//                    .position(location)
+//                    .title(journeys.get(i).getName())
+//                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));  // 使用不同的颜色图标
+//
+//            // 保存 Marker 和 对应信息的映射关系
+//            markerInfoMap.put(marker, generatedInfo);
+        }
+    }
+    private class FetchJourneyInfoTask extends AsyncTask<Void, Void, String> {
+        private String name;
+        private String notes;
+        private LatLng location;
+
+        public FetchJourneyInfoTask(String name, String notes, LatLng location) {
+            this.name = name;
+            this.notes = notes;
+            this.location = location;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            GPTService gptService = new GPTService();
+            return gptService.getJourneyIntroduction(name, notes);
+        }
+
+        @Override
+        protected void onPostExecute(String generatedInfo) {
+            // 在地图上添加标记并显示生成的介绍
             Marker marker = googleMap.addMarker(new MarkerOptions()
                     .position(location)
-                    .title("自定义位置")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));  // 使用不同的颜色图标
+                    .title(name)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
-            // 保存 Marker 和 对应信息的映射关系
-            markerInfoMap.put(marker, info);
+            // 保存 Marker 和 生成的信息
+            markerInfoMap.put(marker, generatedInfo);
         }
     }
     // 显示自定义的信息窗口
