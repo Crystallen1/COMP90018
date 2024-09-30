@@ -1,4 +1,5 @@
 package com.comp90018.comp90018.ui.map;
+import android.app.AlertDialog;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -6,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -84,7 +86,7 @@ public class MapFragment extends Fragment {
         locationService = new LocationService(requireContext());
         Log.d("MapFragment", "LocationService initialized");
         // 添加一些示例位置和信息
-        journeys.add(new Journey("place1","这是墨尔本的位置，显示一些额外信息..",-37.8136, 144.9631)); // 墨尔本
+        journeys.add(new Journey("Flinders station","I hope play around this station about 2 hours",-37.8136, 144.9631)); // 墨尔本
 
 //        journeys.add(new Journey("place2","这是阿德莱德的位置，更多详细信息可以在这里显示...",-37.8285, 144.9641)); // 墨尔本
 
@@ -188,11 +190,27 @@ public class MapFragment extends Fragment {
     }
     // 显示自定义的信息窗口
     private void showInfoWindow(Marker marker, String info) {
-        // 显示 Toast 或者使用一个自定义的布局弹窗
-        Toast.makeText(requireContext(), info, Toast.LENGTH_LONG).show();
+        // 创建一个自定义布局
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.custom_info_window, null);
 
-        // 你也可以创建一个自定义的弹窗，显示更加丰富的信息
-        // 示例中使用了Toast，你可以选择自定义布局来显示详细信息
+        // 在自定义布局中设置文本内容
+        TextView infoTextView = dialogView.findViewById(R.id.info_text);
+        infoTextView.setText(info);
+
+        // 创建 AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setView(dialogView);
+
+        // 设置对话框标题（可选）
+        builder.setTitle("Place Information");
+
+        // 添加关闭按钮（可选）
+        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+
+        // 显示对话框
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
