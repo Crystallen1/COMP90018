@@ -19,9 +19,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("https://esri.jfrog.io/artifactory/arcgis")
-        }
     }
 }
 
