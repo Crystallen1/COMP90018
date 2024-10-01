@@ -2,6 +2,7 @@ plugins {
 //    alias(libs.plugins.android.application)
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -50,6 +51,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -62,4 +64,6 @@ dependencies {
     implementation ("androidx.camera:camera-lifecycle:1.3.4")
     implementation ("androidx.camera:camera-view:1.3.4")
     implementation ("androidx.camera:camera-extensions:1.3.4")
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }

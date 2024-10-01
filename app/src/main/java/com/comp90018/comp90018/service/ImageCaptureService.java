@@ -33,6 +33,10 @@ public class ImageCaptureService {
     public String getCurrentPhotoPath() {
         return currentPhotoPath;
     }
+    public interface PhotoCallback {
+        void onPhotoSaved(File photoFile);
+        void onError(Exception e);
+    }
 
     // 初始化 CameraX，并绑定预览和拍照功能
     public void startCamera(Context context, LifecycleOwner lifecycleOwner, PreviewView previewView) {
@@ -69,13 +73,14 @@ public class ImageCaptureService {
         cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture);
     }
     // 拍照并保存图片
-    public void takePicture(Context context) {
+    public void takePicture(Context context, PhotoCallback callback) {
         File photoFile = null;
         try {
             photoFile = createImageFile(context);
         } catch (IOException e) {
             Log.e("ImageCaptureService", "Error creating image file", e);
         }
+
 
         if (photoFile != null) {
             ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
@@ -84,13 +89,13 @@ public class ImageCaptureService {
                 @Override
                 public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                     Log.d("ImageCaptureService", "Photo saved: " + finalPhotoFile.getAbsolutePath());
-                    currentPhotoPath = finalPhotoFile.getAbsolutePath();
-                    Toast.makeText(context, "Photo saved: " + currentPhotoPath, Toast.LENGTH_SHORT).show();
+                    callback.onPhotoSaved(finalPhotoFile);
                 }
 
                 @Override
                 public void onError(@NonNull ImageCaptureException exception) {
                     Log.e("ImageCaptureService", "Photo capture failed: " + exception.getMessage(), exception);
+                    callback.onError(exception);
                 }
             });
         }

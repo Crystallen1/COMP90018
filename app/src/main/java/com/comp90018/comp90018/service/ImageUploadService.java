@@ -1,54 +1,46 @@
 package com.comp90018.comp90018.service;
+import android.net.Uri;
+import android.util.Log;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-import okhttp3.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 import java.io.File;
-import java.io.IOException;
 
 public class ImageUploadService {
 
-    private OkHttpClient client = new OkHttpClient();
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
 
     public interface UploadCallback {
         void onSuccess(String imageUrl);
         void onFailure(Exception e);
     }
 
-    public void uploadImage(File photoFile, UploadCallback callback) {
-        RequestBody fileBody = RequestBody.create(photoFile, MediaType.parse("image/jpeg"));
-        MultipartBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("image", photoFile.getName(), fileBody)
-                .build();
+    public void uploadImageToFirebase(File photoFile, UploadCallback callback) {
+        Uri fileUri = Uri.fromFile(photoFile);
+        StorageReference storageRef = storage.getReference();
 
-        Request request = new Request.Builder()
-                .url("https://your-server.com/upload")  // 替换为你实际的服务器地址
-                .post(requestBody)
-                .build();
+        // Create a reference to "images/<filename>"
+        StorageReference imagesRef = storageRef.child("images/" + photoFile.getName());
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                callback.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    callback.onFailure(new IOException("Unexpected code " + response));
-                    return;
-                }
-
-                String jsonResponse = response.body().string();
-                try {
-                    JSONObject jsonObject = new JSONObject(jsonResponse);
-                    String imageUrl = jsonObject.getString("url");
-                    callback.onSuccess(imageUrl);
-                } catch (JSONException e) {
+        // Upload the file to Firebase
+        imagesRef.putFile(fileUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    // Get the download URL
+                    imagesRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String imageUrl = uri.toString();
+                        Log.d("ImageUploadService", "Image URL: " + imageUrl);
+                        callback.onSuccess(imageUrl);
+                    }).addOnFailureListener(e -> {
+                        Log.e("ImageUploadService", "Failed to get download URL", e);
+                        callback.onFailure(e);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ImageUploadService", "Image upload failed", e);
                     callback.onFailure(e);
-                }
-            }
-        });
+                });
     }
 }
