@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "814645165367",
+    "project_id": "letstrip-8938c",
+    "storage_bucket": "letstrip-8938c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814645165367:android:3732f2ff2008a016802eb2",
+        "android_client_info": {
+          "package_name": "com.comp90018.comp90018"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyjHWse3u5QrUat9Rv4NyzDT-SL4Rr4C4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
