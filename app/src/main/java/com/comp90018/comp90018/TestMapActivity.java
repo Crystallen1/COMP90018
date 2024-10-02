@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.comp90018.comp90018.R;
@@ -57,7 +58,12 @@ public class TestMapActivity extends AppCompatActivity {
                     openCameraFragment();
                 }
             }else {
-                openCameraFragment();
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                if (currentFragment instanceof MapFragment) {
+                    openCameraFragment();
+                } else if (currentFragment instanceof CameraFragment) {
+                    openMapFragment();
+                }
             }
         });
     }
@@ -70,6 +76,13 @@ public class TestMapActivity extends AppCompatActivity {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, new CameraFragment());
         transaction.addToBackStack(null); // 添加到回退栈，按返回按钮时回到地图
+        transaction.commit();
+    }
+    private void openMapFragment() {
+        // 替换当前 Fragment 为 MapFragment
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, new MapFragment());
+        transaction.addToBackStack(null); // 添加到回退栈，按返回按钮时回到上一个 Fragment
         transaction.commit();
     }
 }

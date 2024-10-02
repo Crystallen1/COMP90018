@@ -76,13 +76,20 @@ public class CameraFragment extends Fragment {
                                     GPTService gptService = new GPTService();
                                     String result = gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude);
 
-                                    // Log网络请求结果
-                                    Log.d("CameraFragment", result);
-
                                     // 使用Handler回到主线程更新UI
                                     mainHandler.post(() -> {
-                                        // 确保 resultTextView 已经初始化
-                                        Log.d("CameraFragment", result);
+                                        imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Log.d("CameraFragment", "success delete image from firebase");
+
+                                                Log.d("CameraFragment", result);
+                                            }
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                                Log.e("CameraFragment", "Error in delete image from firebase", e);
+                                            }
+                                        });
                                     });
                                 } catch (Exception e) {
                                     // 捕获可能的异常并记录

@@ -18,6 +18,7 @@ import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.model.Journey;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
+import com.comp90018.comp90018.service.NavigationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -28,15 +29,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
     private GoogleMap googleMap;
     private LocationService locationService;
     private Marker currentLocationMarker;
+    private NavigationService navigationService;
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
@@ -47,6 +51,8 @@ public class MapFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+        navigationService = new NavigationService(getString(R.string.google_api_key));
+
 
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
@@ -79,6 +85,7 @@ public class MapFragment extends Fragment {
                         return false;  // 返回 false 以继续显示默认的 InfoWindow
                     }
                 });
+                displayRoute("Sydney", "Melbourne");
             }
         });
 
@@ -92,6 +99,25 @@ public class MapFragment extends Fragment {
 
 
         return rootView;
+    }
+
+    private void displayRoute(String origin, String destination) {
+        navigationService.getDirections(origin, destination, new NavigationService.DirectionsCallback() {
+            @Override
+            public void onSuccess(List<String> routes) {
+                requireActivity().runOnUiThread(() -> {
+                    // 在地图上绘制路线
+                    for (String route : routes) {
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // 处理错误
+                Log.e("MapFragment", "Failed to get directions", e);
+            }
+        });
     }
 
     private void updateLocationOnMap() {
