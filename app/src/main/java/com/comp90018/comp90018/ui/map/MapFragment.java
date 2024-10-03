@@ -2,6 +2,8 @@ package com.comp90018.comp90018.ui.map;
 import android.app.AlertDialog;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -53,10 +56,6 @@ public class MapFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-
-        String apiKey = getApiKeyFromMetaData();
-
-
         navigationService = new NavigationService();
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
@@ -73,7 +72,17 @@ public class MapFragment extends Fragment {
                 googleMap.getUiSettings().setTiltGesturesEnabled(true);  // 启用倾斜手势
 
                 Log.d("MapFragment", "Map loaded with default location");
+                // 加载并应用自定义地图样式
+                try {
+                    boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
+                            getContext(), R.raw.map_style));
 
+                    if (!success) {
+                        Log.e("MapFragment", "Failed to apply map style");
+                    }
+                } catch (Resources.NotFoundException e) {
+                    Log.e("MapFragment", "Can't find map style. Error: ", e);
+                }
                 // 开始更新位置
                 updateLocationOnMap();
                 addLocationsToMap();
@@ -110,8 +119,9 @@ public class MapFragment extends Fragment {
             @Override
             public void onSuccess(List<LatLng> routes) {
                 getActivity().runOnUiThread(() -> {
-
-                    PolylineOptions polylineOptions = new PolylineOptions();
+                    PolylineOptions polylineOptions = new PolylineOptions()
+                            .color(Color.BLUE) // 设置线的颜色，例如蓝色
+                            .width(10); // 设置线的宽度，例如10像素;
                     for (LatLng point : routes) {
                         polylineOptions.add(point);
                     }
