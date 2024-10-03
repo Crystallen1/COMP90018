@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.maps.internal.PolylineEncoding;
 
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -23,41 +25,68 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class NavigationService {
-
+    private static final String TAG = "NavigationService";
     private static final String BASE_URL = "https://maps.googleapis.com/maps/api/directions/json";
-    private String apiKey;
+    String API_KEY;
+    private ApiKeyService apiKeyService = new ApiKeyService();
+    private CompletableFuture<String> apiKeyFuture;
 
-    public NavigationService(String apiKey) {
-        this.apiKey = apiKey;
+    public NavigationService() {
+        apiKeyFuture = new CompletableFuture<>();
+
+        apiKeyService.enable();
+        apiKeyService.getApiKey("MAP_API_KEY", new ApiKeyService.ApiKeyCallback() {
+           @Override
+           public void onApiKeyRetrieved(String apiKey) {
+               API_KEY = apiKey;
+               Log.d(TAG,"Get the map api key:"+apiKey);
+               apiKeyFuture.complete(apiKey);
+           }
+           @Override
+           public void onFailure(Exception e) {
+                Log.e(TAG, "fail to get the map api key:"+e);
+               apiKeyFuture.completeExceptionally(new RuntimeException("Failed to fetch API key"));
+
+           }
+       });
     }
 
     public void getDirections(String origin, String destination, DirectionsCallback callback) {
-        OkHttpClient client = new OkHttpClient();
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(BASE_URL).newBuilder();
-        urlBuilder.addQueryParameter("origin", origin);
-        urlBuilder.addQueryParameter("destination", destination);
-        urlBuilder.addQueryParameter("key", apiKey);
-
-        String url = urlBuilder.build().toString();
-        Request request = new Request.Builder().url(url).build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onFailure(e);
+        apiKeyFuture.thenAccept(apiKey -> {
+            // 使用apiKey进行操作
+            OkHttpClient client = new OkHttpClient();
+            if (API_KEY==null){
+                Log.e(TAG,"APIKEY is null");
             }
+            HttpUrl.Builder urlBuilder = HttpUrl.parse(BASE_URL).newBuilder();
+            urlBuilder.addQueryParameter("origin", origin);
+            urlBuilder.addQueryParameter("destination", destination);
+            urlBuilder.addQueryParameter("key", API_KEY);
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String jsonResponse = response.body().string();
+            String url = urlBuilder.build().toString();
+            Request request = new Request.Builder().url(url).build();
 
-                    // 解析JSON并将数据传递给回调
-                    callback.onSuccess(parseDirectionsResponse(jsonResponse));
-                } else {
-                    callback.onFailure(new IOException("Unexpected code " + response));
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    callback.onFailure(e);
                 }
-            }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        String jsonResponse = response.body().string();
+
+                        // 解析JSON并将数据传递给回调
+                        callback.onSuccess(parseDirectionsResponse(jsonResponse));
+                    } else {
+                        callback.onFailure(new IOException("Unexpected code " + response));
+                    }
+                }
+            });
+        }).exceptionally(throwable -> {
+            Log.e("GPTService", throwable.getMessage());
+            return null;
         });
     }
 

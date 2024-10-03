@@ -57,7 +57,7 @@ public class MapFragment extends Fragment {
         String apiKey = getApiKeyFromMetaData();
 
 
-        navigationService = new NavigationService(apiKey);
+        navigationService = new NavigationService();
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -109,13 +109,14 @@ public class MapFragment extends Fragment {
         navigationService.getDirections(origin, destination, new NavigationService.DirectionsCallback() {
             @Override
             public void onSuccess(List<LatLng> routes) {
-                requireActivity().runOnUiThread(() -> {
+                getActivity().runOnUiThread(() -> {
+
                     PolylineOptions polylineOptions = new PolylineOptions();
                     for (LatLng point : routes) {
                         polylineOptions.add(point);
                     }
                     googleMap.addPolyline(polylineOptions);
-                });
+            });
             }
 
             @Override
