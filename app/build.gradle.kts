@@ -41,6 +41,9 @@ android {
         }
     }
 }
+//repositories {
+//    mavenCentral()
+//}
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -67,4 +70,5 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-auth:21.1.0")
+    implementation("com.google.maps:google-maps-services:2.2.0")
 }

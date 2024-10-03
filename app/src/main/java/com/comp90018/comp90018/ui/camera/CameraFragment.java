@@ -69,33 +69,59 @@ public class CameraFragment extends Fragment {
                             // Now pass the image URL to GPT to get a journey introduction
                             double latitude = 44;  // Obtain latitude
                             double longitude = 10;  // Obtain longitude
-                            // 在后台线程中执行GPT请求
-                            executorService.execute(() -> {
-                                try {
-                                    // 创建GPTService实例并调用方法
-                                    GPTService gptService = new GPTService();
-                                    String result = gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude);
+                            GPTService gptService = new GPTService();
+                            gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude, new GPTService.GPTCallback() {
+                                @Override
+                                public void onSuccess(String result) {
+                                    imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            Log.d("CameraFragment", "success delete image from firebase");
 
-                                    // 使用Handler回到主线程更新UI
-                                    mainHandler.post(() -> {
-                                        imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
-                                            @Override
-                                            public void onSuccess() {
-                                                Log.d("CameraFragment", "success delete image from firebase");
-
-                                                Log.d("CameraFragment", result);
-                                            }
-                                            @Override
-                                            public void onFailure(Exception e) {
-                                                Log.e("CameraFragment", "Error in delete image from firebase", e);
-                                            }
-                                        });
+                                            Log.d("CameraFragment", result);
+                                        }
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            Log.e("CameraFragment", "Error in delete image from firebase", e);
+                                        }
                                     });
-                                } catch (Exception e) {
-                                    // 捕获可能的异常并记录
-                                    Log.e("CameraFragment", "Error in GPT request", e);
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    Log.e("CameraFragment", "Error in GPT request");
+                                    Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
+
                                 }
                             });
+//
+//                            // 在后台线程中执行GPT请求
+//                            executorService.execute(() -> {
+//                                try {
+//                                    // 创建GPTService实例并调用方法
+//                                    GPTService gptService = new GPTService();
+//                                    String result = gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude);
+//
+//                                    // 使用Handler回到主线程更新UI
+//                                    mainHandler.post(() -> {
+//                                        imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
+//                                            @Override
+//                                            public void onSuccess() {
+//                                                Log.d("CameraFragment", "success delete image from firebase");
+//
+//                                                Log.d("CameraFragment", result);
+//                                            }
+//                                            @Override
+//                                            public void onFailure(Exception e) {
+//                                                Log.e("CameraFragment", "Error in delete image from firebase", e);
+//                                            }
+//                                        });
+//                                    });
+//                                } catch (Exception e) {
+//                                    // 捕获可能的异常并记录
+//                                    Log.e("CameraFragment", "Error in GPT request", e);
+//                                }
+//                            });
                         }
 
                         @Override
