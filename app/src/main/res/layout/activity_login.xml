@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:padding="24dp">
 
-        <!-- Title -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
@@ -24,13 +23,14 @@
             android:text="Login"
             android:textSize="28sp"
             android:textStyle="bold"
+
             android:textColor="@color/blue"
+
             android:gravity="center"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Username Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilUsername"
             android:layout_width="0dp"
@@ -51,7 +51,7 @@
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password Input -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilPassword"
             android:layout_width="0dp"
@@ -73,7 +73,7 @@
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Moved "Forgot Password?" above Login button -->
+
         <TextView
             android:id="@+id/tvForgotPassword"
             android:layout_width="wrap_content"
@@ -85,7 +85,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="16dp" />
 
-        <!-- Login Button -->
+
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="0dp"
@@ -129,7 +129,7 @@
                 android:paddingEnd="4dp"
                 android:textStyle="bold" />
         </LinearLayout>
-        <!-- ProgressBar -->
+
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="48dp"
