@@ -37,7 +37,7 @@ public class GPTService {
 
     public GPTService() {
         apiKeyFuture = new CompletableFuture<>();
-        apiKeyService.disable();
+        apiKeyService.enable();
         apiKeyService.getApiKey("GPT_API_KEY", new ApiKeyService.ApiKeyCallback() {
             @Override
             public void onApiKeyRetrieved(String apiKey) {
@@ -139,7 +139,8 @@ public class GPTService {
     }
 
     public void getImageBasedJourneyIntroduction(String imageUrl, double latitude, double longitude,GPTCallback callback) {
-        try {
+        apiKeyFuture.thenAccept(apiKey -> {
+                    try {
             JSONObject jsonRequest = new JSONObject();
             jsonRequest.put("model", "gpt-4o");
 
@@ -166,11 +167,12 @@ public class GPTService {
                     .post(body)
                     .addHeader("Authorization", "Bearer " + API_KEY)
                     .build();
-// 发起异步请求
+            // 发起异步请求
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     String errorMessage = getErrorMessage(e);
+                    // 在主线程中调用回调
                     runOnUiThread(() -> callback.onFailure(errorMessage));
                 }
 
@@ -191,7 +193,7 @@ public class GPTService {
                             JSONObject messageObject = firstChoice.getJSONObject("message");
                             if (messageObject.has("content")) {
                                 String result = messageObject.getString("content").trim();
-                                // 回调成功结果
+                                // 在主线程中调用成功回调
                                 runOnUiThread(() -> callback.onSuccess(result));
                             } else {
                                 runOnUiThread(() -> callback.onFailure("No 'content' field in the message object"));
@@ -209,6 +211,10 @@ public class GPTService {
             Log.e(TAG, "JSON parsing/creation error: " + e.getMessage(), e);
             callback.onFailure("Error generating journey introduction due to JSON error.");
         }
+    }).exceptionally(throwable -> {
+            Log.e("GPTService", throwable.getMessage());
+            return null;
+        });
     }
 
     // 根据不同的异常类型返回合适的错误信息

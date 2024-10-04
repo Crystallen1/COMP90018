@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.comp90018.comp90018.R;
@@ -72,17 +73,31 @@ public class TestMapActivity extends AppCompatActivity {
         return cameraPreviewView;
     }
     private void openCameraFragment() {
-        // 替换地图 Fragment 为 CameraFragment
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, new CameraFragment());
-        transaction.addToBackStack(null); // 添加到回退栈，按返回按钮时回到地图
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag("cameraFragment");
+
+        if (cameraFragment == null) {
+            // 如果没有实例化过，则创建新的实例
+            cameraFragment = new CameraFragment();
+        }
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, cameraFragment, "cameraFragment");
+        transaction.addToBackStack(null);
         transaction.commit();
     }
     private void openMapFragment() {
-        // 替换当前 Fragment 为 MapFragment
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, new MapFragment());
-        transaction.addToBackStack(null); // 添加到回退栈，按返回按钮时回到上一个 Fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentByTag("mapFragment");
+
+        if (mapFragment == null) {
+            // 如果没有实例化过，则创建新的实例
+            mapFragment = new MapFragment();
+        }
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, mapFragment, "mapFragment");
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 }
