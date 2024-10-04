@@ -38,10 +38,41 @@ public class AuthenticationService {
                         if (task.isSuccessful()) {
                             // 注册成功，获取用户信息
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show();
+
+                            // 发送邮箱验证
+                            if (user != null) {
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(context, "Registration successful! Verification email sent.", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(context, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                            }
                         } else {
                             // 如果注册失败，显示错误消息
                             Toast.makeText(context, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    // 忘记密码 - 发送重置密码邮件
+    public void sendPasswordResetEmail(String email) {
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // 邮件发送成功
+                            Toast.makeText(context, "Password reset email sent.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // 邮件发送失败
+                            Toast.makeText(context, "Failed to send password reset email: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

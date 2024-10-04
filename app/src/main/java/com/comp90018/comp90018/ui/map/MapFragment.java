@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.model.Journey;
+import com.comp90018.comp90018.model.Navigation;
+import com.comp90018.comp90018.model.NavigationStep;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
 import com.comp90018.comp90018.service.NavigationService;
@@ -117,13 +119,15 @@ public class MapFragment extends Fragment {
     private void displayRoute(String origin, String destination) {
         navigationService.getDirections(origin, destination, new NavigationService.DirectionsCallback() {
             @Override
-            public void onSuccess(List<LatLng> routes) {
+            public void onSuccess(Navigation routes) {
                 getActivity().runOnUiThread(() -> {
                     PolylineOptions polylineOptions = new PolylineOptions()
                             .color(Color.BLUE) // 设置线的颜色，例如蓝色
                             .width(10); // 设置线的宽度，例如10像素;
-                    for (LatLng point : routes) {
-                        polylineOptions.add(point);
+                    for (NavigationStep route : routes.getNavigationSteps()) {
+                        for (LatLng point: route.getRoutes()) {
+                            polylineOptions.add(point);
+                        }
                     }
                     googleMap.addPolyline(polylineOptions);
             });
