@@ -32,7 +32,7 @@
             android:value="AIzaSyAOgJTqwR6bEZ1LKxsfcuhr5UlkEIwbV9I" />
 
         <activity
-            android:name=".TestMapActivity"
+            android:name=".LoginActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -41,6 +41,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".TestMapActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
