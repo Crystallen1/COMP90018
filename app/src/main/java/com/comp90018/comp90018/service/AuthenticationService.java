@@ -2,12 +2,14 @@ package com.comp90018.comp90018.service;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,7 +32,7 @@ public class AuthenticationService {
     }
 
     // 注册方法
-    public Task<AuthResult> createAccount(String email, String password) {
+    public Task<AuthResult> createAccount(String email, String password, AuthCallback callback) {
         return mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -46,8 +48,10 @@ public class AuthenticationService {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
+                                                    callback.onSuccess(user);
                                                     Toast.makeText(context, "Registration successful! Verification email sent.", Toast.LENGTH_SHORT).show();
                                                 } else {
+                                                    callback.onFailure("Failed to send verification email.");
                                                     Toast.makeText(context, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
                                                 }
                                             }
@@ -155,5 +159,38 @@ public class AuthenticationService {
                         }
                     }
                 });
+    }
+    // 输入验证方法
+    public boolean validateInput(TextInputEditText emailField, TextInputEditText passwordField, TextInputEditText confirmPasswordField) {
+        String email = emailField.getText().toString().trim();
+        String password = passwordField.getText().toString().trim();
+        String confirmPassword = confirmPasswordField.getText().toString().trim();
+
+        if (TextUtils.isEmpty(email)) {
+            emailField.setError("Email cannot be empty");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            passwordField.setError("Password cannot be empty");
+            return false;
+        }
+
+        if (password.length() < 6) {
+            passwordField.setError("Password must be at least 6 characters long");
+            return false;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            confirmPasswordField.setError("Passwords do not match");
+            return false;
+        }
+
+        return true;
+    }
+
+    public interface AuthCallback {
+        void onSuccess(FirebaseUser user);
+        void onFailure(String errorMessage);
     }
 }
