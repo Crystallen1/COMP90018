@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-    <!-- Fragment container for the map -->
     <FrameLayout
-        android:id="@+id/fragment_container"
+        android:id="@+id/mapFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-    <!-- Floating Action Button (FAB) as a toolbar button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+    <!-- TextView that displays step count -->
+    <!-- 为了强制显示step count，后续删除 -->
+    <TextView
+        android:id="@+id/step_count_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:contentDescription="Camera Action"
-        android:src="@drawable/ic_launcher_foreground"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@android:color/white" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="step count: 0"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_gravity="top|center_horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="8dp" />
+
+</FrameLayout>
