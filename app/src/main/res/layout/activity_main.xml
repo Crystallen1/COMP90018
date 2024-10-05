@@ -30,4 +30,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
+    <TextView
+        android:id="@+id/step_count_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="step count: 0"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

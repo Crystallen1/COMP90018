@@ -3,4 +3,24 @@
     android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/mapFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- TextView that displays step count -->
+    <!-- 为了强制显示step count，后续删除 -->
+    <TextView
+        android:id="@+id/step_count_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="step count: 0"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_gravity="top|center_horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="8dp" />
+
 </FrameLayout>

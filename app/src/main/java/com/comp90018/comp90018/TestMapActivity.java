@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.ui.map.MapFragment;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import android.widget.TextView;
+
 
 public class TestMapActivity extends AppCompatActivity {
 
@@ -12,6 +14,9 @@ public class TestMapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_map);
         setApiKeyForApp();
+
+        //TextView stepCountTextView = findViewById(R.id.step_count_text);
+        //stepCountTextView.setText("step count: 0");
 
         // 加载 MapFragment
         if (savedInstanceState == null) {
