@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.comp90018.comp90018.HomeActivity;
 import com.comp90018.comp90018.TestMapActivity;
 import com.comp90018.comp90018.service.AuthenticationService;
 import com.comp90018.comp90018.R;
@@ -88,7 +89,7 @@ public class RegisterFragment  extends Fragment {
                                     if (task.isSuccessful()) {
                                         // 注册成功的处理
                                         // 登录成功后跳转到 MainActivity
-                                        Intent intent = new Intent(getActivity(), TestMapActivity.class);
+                                        Intent intent = new Intent(getActivity(), HomeActivity.class);
                                         startActivity(intent);
                                         getActivity().finish();
                                     } else {

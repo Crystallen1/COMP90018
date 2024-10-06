@@ -42,6 +42,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".TestMapActivity" />
+        <activity android:name=".HomeActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -2,7 +2,6 @@ package com.comp90018.comp90018.service;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.CameraSelector;
@@ -14,9 +13,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.comp90018.comp90018.MainActivity;
-import com.comp90018.comp90018.TestMapActivity;
-import com.comp90018.comp90018.ui.camera.CameraFragment;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;

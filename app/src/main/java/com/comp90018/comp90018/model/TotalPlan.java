@@ -10,4 +10,43 @@ public class TotalPlan {
     private int duration;
     private String city;
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public List<DayPlan> getDayPlans() {
+        return dayPlans;
+    }
+
+    public void setDayPlans(List<DayPlan> dayPlans) {
+        this.dayPlans = dayPlans;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 }

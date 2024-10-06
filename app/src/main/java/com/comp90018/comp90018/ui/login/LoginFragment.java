@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.comp90018.comp90018.HomeActivity;
 import com.comp90018.comp90018.TestMapActivity;
 import com.comp90018.comp90018.service.AuthenticationService;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,6 +33,7 @@ public class LoginFragment extends Fragment {
     private ProgressBar progressBar;
     private AuthenticationService authenticationService;
     private TextView tvSignUp;
+    private TextView tvFogetPassword;
 
 
     @Nullable
@@ -49,6 +51,7 @@ public class LoginFragment extends Fragment {
         btnLogin = view.findViewById(R.id.btnLogin);
         progressBar = view.findViewById(R.id.progressBar);
         tvSignUp = view.findViewById(R.id.tvSignUp);
+        tvFogetPassword = view.findViewById(R.id.tvForgotPassword);
 
         // 按钮点击事件
         btnLogin.setOnClickListener(new View.OnClickListener() {
@@ -73,7 +76,7 @@ public class LoginFragment extends Fragment {
                                         // 登录成功的处理
                                         Toast.makeText(getActivity(), "Login successful!", Toast.LENGTH_SHORT).show();
                                         // 登录成功后跳转到 MainActivity
-                                        Intent intent = new Intent(getActivity(), TestMapActivity.class);
+                                        Intent intent = new Intent(getActivity(), HomeActivity.class);
                                         startActivity(intent);
                                         getActivity().finish(); // 结束当前 Activity
                                     } else {
@@ -94,6 +97,13 @@ public class LoginFragment extends Fragment {
             }
         });
 
+        tvFogetPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navigateToForgetPasswordFragment();
+            }
+        });
+
         return view;
     }
 
@@ -106,6 +116,19 @@ public class LoginFragment extends Fragment {
 
         // 替换当前 Fragment 并将其添加到返回栈
         fragmentTransaction.replace(R.id.fragment_container, registerFragment);
+        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
+        fragmentTransaction.commit();
+    }
+
+    private void navigateToForgetPasswordFragment() {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // 创建 RegisterFragment 实例
+        ForgotPasswordFragment forgotPasswordFragment = new ForgotPasswordFragment();
+
+        // 替换当前 Fragment 并将其添加到返回栈
+        fragmentTransaction.replace(R.id.fragment_container, forgotPasswordFragment);
         fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
         fragmentTransaction.commit();
     }

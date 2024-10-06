@@ -7,4 +7,20 @@ public class DayPlan {
     private Date date;
     private List<Journey> journeys;
 
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public List<Journey> getJourneys() {
+        return journeys;
+    }
+
+    public void setJourneys(List<Journey> journeys) {
+        this.journeys = journeys;
+    }
 }
