@@ -31,6 +31,7 @@ public class ForgotPasswordFragment extends Fragment {
     private ProgressBar progressBarForgotPassword;
     private TextView llBackToLogin;
     private AuthenticationService authService;
+    private NavController navController;
 
     @Nullable
     @Override
@@ -75,8 +76,13 @@ public class ForgotPasswordFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController= Navigation.findNavController(requireView());
+    }
+
     private void navigateToLoginFragment() {
-        NavController navController = Navigation.findNavController(requireView());
         navController.navigate(R.id.action_forget_password_to_login);
 //        FragmentManager fragmentManager = getParentFragmentManager();
 //        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

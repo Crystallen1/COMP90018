@@ -39,6 +39,24 @@
         android:label="Attractions"
         tools:layout="@layout/fragment_attractions" />
 
+    <fragment
+        android:id="@+id/navigation_duration"
+        android:name="com.comp90018.comp90018.ui.createTrip.DurationFragment"
+        android:label="Duration"
+        tools:layout="@layout/fragment_trip_duration" />
+
+    <fragment
+        android:id="@+id/navigation_plan"
+        android:name="com.comp90018.comp90018.ui.plan.PlanFragment"
+        android:label="Plan"
+        tools:layout="@layout/fragment_plan" />
+
+    <fragment
+        android:id="@+id/navigation_feedback"
+        android:name="com.comp90018.comp90018.ui.feedback.FeedbackFragment"
+        android:label="Feedback"
+        tools:layout="@layout/fragment_feedback" />
+
     <action
         android:id="@+id/action_home_to_map"
         app:destination="@id/navigation_map" />
@@ -54,4 +72,39 @@
     <action
         android:id="@+id/action_home_to_create_trip"
         app:destination="@id/navigation_create_trip" />
+
+    <action
+        android:id="@+id/action_create_trip_to_home"
+        app:destination="@id/navigation_home" />
+    <action
+        android:id="@+id/action_create_trip_to_duration"
+        app:destination="@id/navigation_duration" />
+
+    <action
+        android:id="@+id/action_duration_to_create_trip"
+        app:destination="@id/navigation_create_trip" />
+
+    <action
+        android:id="@+id/action_duration_to_attraction"
+        app:destination="@id/navigation_attraction" />
+    <action
+        android:id="@+id/action_attraction_to_duration"
+        app:destination="@id/navigation_duration" />
+    <action
+        android:id="@+id/action_attraction_to_plan"
+        app:destination="@id/navigation_plan" />
+
+    <action
+        android:id="@+id/action_plan_to_home"
+        app:destination="@id/navigation_home" />
+    <action
+        android:id="@+id/action_plan_to_feedback"
+        app:destination="@id/navigation_feedback" />
+    <action
+        android:id="@+id/action_feedback_to_home"
+        app:destination="@id/navigation_home" />
+    <action
+        android:id="@+id/action_feedback_to_plan"
+        app:destination="@id/navigation_plan" />
+
 </navigation>

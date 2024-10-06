@@ -14,6 +14,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,6 +36,7 @@ public class PlanFragment extends Fragment {
     private PlanAdapter planAdapter;
     private List<Plan> planList;
     private Calendar calendar = Calendar.getInstance(); // 用于保存选中的日期
+    private NavController navController;
 
     @Nullable
     @Override
@@ -61,6 +64,12 @@ public class PlanFragment extends Fragment {
         btnAddPlan.setOnClickListener(v -> showAddPlanDialog());
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController = Navigation.findNavController(requireView());
     }
 
     // 显示添加计划的底部对话框

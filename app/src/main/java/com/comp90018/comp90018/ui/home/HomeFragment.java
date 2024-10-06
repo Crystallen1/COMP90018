@@ -34,6 +34,8 @@ public class HomeFragment extends Fragment {
 
     private TripAdapter tripAdapter;
     private List<Trip> tripList;
+    private NavController navController;
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -55,6 +57,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        navController= Navigation.findNavController(requireView());
 
         // 设置点击事件
         buttonCreateTrip.setOnClickListener(new View.OnClickListener() {
@@ -63,7 +66,6 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "Create Trip Clicked", Toast.LENGTH_SHORT).show();
                 // TODO: 实现导航到 CreateTripFragment
                 // 例如：
-                NavController navController = Navigation.findNavController(requireView());
                 navController.navigate(R.id.action_home_to_create_trip);
             }
         });
