@@ -11,4 +11,14 @@
     <string name="view_all_description">View all trips</string>
     <string name="create_trip">Create Trip</string>
     <string name="create_trip_description">Create a new trip</string>
+    <string name="trip_title_hint">Trip Title</string>
+    <string name="select_date_range_hint">Select Date Range</string>
+    <string name="location_hint">Location</string>
+    <string name="remarks_hint">Remarks</string>
+    <string name="submit_button">Submit</string>
+    <string name="trip_title_required">Trip Title is required</string>
+    <string name="date_range_required">Date Range is required</string>
+    <string name="location_required">Location is required</string>
+    <string name="trip_created_successfully">Trip Created Successfully</string>
+
 </resources>
