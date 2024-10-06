@@ -13,12 +13,11 @@
         android:layout_height="wrap_content"
         android:text="Create Trip"
         app:cornerRadius="8dp"
-        app:backgroundTint="@color/blue"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- My Trip Title with View All -->
+    <!-- My Trips Title and View All Button -->
     <LinearLayout
         android:id="@+id/layout_title_viewall"
         android:layout_width="0dp"
@@ -46,7 +45,7 @@
             android:text="View All"
             style="@style/Widget.MaterialComponents.Button.TextButton" />
     </LinearLayout>
-
+    
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_trips"
         android:layout_width="0dp"
