@@ -3,4 +3,12 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="back_button">Back</string>
+    <string name="create_button">Create</string>
+    <string name="add_trip">Add Trip</string>
+    <string name="trip_title">Trip</string>
+    <string name="view_all">View all</string>
+    <string name="view_all_description">View all trips</string>
+    <string name="create_trip">Create Trip</string>
+    <string name="create_trip_description">Create a new trip</string>
 </resources>
