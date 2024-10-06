@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.service.AuthenticationService;
@@ -41,7 +43,7 @@ public class ForgotPasswordFragment extends Fragment {
         etForgotEmail = view.findViewById(R.id.etForgotEmail);
         btnSubmitForgotPassword = view.findViewById(R.id.btnSubmitForgotPassword);
         progressBarForgotPassword = view.findViewById(R.id.progressBarForgotPassword);
-        llBackToLogin = view.findViewById(R.id.tvBackToLoginText);
+        llBackToLogin = view.findViewById(R.id.tvBackToLogin);
 
         authService = new AuthenticationService(getActivity());
 
@@ -74,22 +76,23 @@ public class ForgotPasswordFragment extends Fragment {
     }
 
     private void navigateToLoginFragment() {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        // 创建 RegisterFragment 实例
-        LoginFragment loginFragment = new LoginFragment();
-
-        // 替换当前 Fragment 并将其添加到返回栈
-        fragmentTransaction.replace(R.id.fragment_container, loginFragment);
-        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
-        fragmentTransaction.commit();
+        NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.action_forget_password_to_login);
+//        FragmentManager fragmentManager = getParentFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//
+//        // 创建 RegisterFragment 实例
+//        LoginFragment loginFragment = new LoginFragment();
+//
+//        // 替换当前 Fragment 并将其添加到返回栈
+//        fragmentTransaction.replace(R.id.fragment_container, loginFragment);
+//        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
+//        fragmentTransaction.commit();
     }
 
     // 使用AuthenticationService处理密码重置
     private void handleForgotPassword(String email) {
         authService.sendPasswordResetEmail(email);
-
         // 隐藏进度条
         progressBarForgotPassword.setVisibility(View.GONE);
     }

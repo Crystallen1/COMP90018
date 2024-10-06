@@ -44,6 +44,7 @@
         <activity android:name=".TestMapActivity" />
         <activity android:name=".HomeActivity" />
 
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.android.fileprovider"

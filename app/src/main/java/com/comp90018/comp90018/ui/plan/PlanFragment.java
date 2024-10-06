@@ -1,16 +1,19 @@
-package com.comp90018.comp90018;
+package com.comp90018.comp90018.ui.plan;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,21 +28,22 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-public class PlanActivity extends AppCompatActivity {
+public class PlanFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private PlanAdapter planAdapter;
     private List<Plan> planList;
     private Calendar calendar = Calendar.getInstance(); // 用于保存选中的日期
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_plan);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // 加载布局文件
+        View view = inflater.inflate(R.layout.fragment_plan, container, false);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // 初始化RecyclerView
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // 初始化计划列表
         planList = new ArrayList<>();
@@ -49,18 +53,20 @@ public class PlanActivity extends AppCompatActivity {
         planList.add(new Plan("2024-10-10", "Yarra Valley", "Wine Tasting"));
 
         // 设置适配器
-        planAdapter = new PlanAdapter(this, planList);
+        planAdapter = new PlanAdapter(getContext(), planList);
         recyclerView.setAdapter(planAdapter);
 
         // 浮动按钮用于添加计划
-        FloatingActionButton btnAddPlan = findViewById(R.id.btnAddPlan);
+        FloatingActionButton btnAddPlan = view.findViewById(R.id.btnAddPlan);
         btnAddPlan.setOnClickListener(v -> showAddPlanDialog());
+
+        return view;
     }
 
     // 显示添加计划的底部对话框
     private void showAddPlanDialog() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_plan, null);
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_plan, null);
         bottomSheetDialog.setContentView(dialogView);
 
         TextView tvPlanTime = dialogView.findViewById(R.id.tvPlanTime);
@@ -70,7 +76,7 @@ public class PlanActivity extends AppCompatActivity {
 
         // 点击时间选择框时，显示日期选择器
         tvPlanTime.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                     calendar.set(year, month, dayOfMonth); // 保存选择的日期
@@ -95,7 +101,7 @@ public class PlanActivity extends AppCompatActivity {
 
                 bottomSheetDialog.dismiss(); // 关闭对话框
             } else {
-                Toast.makeText(PlanActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
             }
         });
 

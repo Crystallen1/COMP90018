@@ -15,6 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.comp90018.comp90018.HomeActivity;
 import com.comp90018.comp90018.TestMapActivity;
@@ -108,29 +110,33 @@ public class LoginFragment extends Fragment {
     }
 
     private void navigateToRegisterFragment() {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        // 创建 RegisterFragment 实例
-        RegisterFragment registerFragment = new RegisterFragment();
-
-        // 替换当前 Fragment 并将其添加到返回栈
-        fragmentTransaction.replace(R.id.fragment_container, registerFragment);
-        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
-        fragmentTransaction.commit();
+        NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.action_login_to_register);
+//        FragmentManager fragmentManager = getParentFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//
+//        // 创建 RegisterFragment 实例
+//        RegisterFragment registerFragment = new RegisterFragment();
+//
+//        // 替换当前 Fragment 并将其添加到返回栈
+//        fragmentTransaction.replace(R.id.fragment_container, registerFragment);
+//        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
+//        fragmentTransaction.commit();
     }
 
     private void navigateToForgetPasswordFragment() {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        // 创建 RegisterFragment 实例
-        ForgotPasswordFragment forgotPasswordFragment = new ForgotPasswordFragment();
-
-        // 替换当前 Fragment 并将其添加到返回栈
-        fragmentTransaction.replace(R.id.fragment_container, forgotPasswordFragment);
-        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
-        fragmentTransaction.commit();
+        NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.action_login_to_forget_password);
+//        FragmentManager fragmentManager = getParentFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//
+//        // 创建 RegisterFragment 实例
+//        ForgotPasswordFragment forgotPasswordFragment = new ForgotPasswordFragment();
+//
+//        // 替换当前 Fragment 并将其添加到返回栈
+//        fragmentTransaction.replace(R.id.fragment_container, forgotPasswordFragment);
+//        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
+//        fragmentTransaction.commit();
     }
 
     // 验证输入

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -10,16 +9,49 @@
         android:name="com.comp90018.comp90018.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="com.comp90018.comp90018.ui.map.MapFragment"
+        android:label="Map"
+        tools:layout="@layout/fragment_map" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.comp90018.comp90018.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_detail"
+        android:name="com.comp90018.comp90018.ui.detail.DetailFragment"
+        android:label="Detail"
+        tools:layout="@layout/fragment_attractions_detail" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.comp90018.comp90018.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_create_trip"
+        android:name="com.comp90018.comp90018.ui.createTrip.CreateTripFragment"
+        android:label="CreateTrip"
+        tools:layout="@layout/fragment_create_trip" />
+
+    <fragment
+        android:id="@+id/navigation_camera"
+        android:name="com.comp90018.comp90018.ui.camera.CameraFragment"
+        android:label="Camera"
+        tools:layout="@layout/fragment_camera" />
+
+    <fragment
+        android:id="@+id/navigation_attraction"
+        android:name="com.comp90018.comp90018.ui.attractions.AttractionsFragment"
+        android:label="Attractions"
+        tools:layout="@layout/fragment_attractions" />
+
+    <action
+        android:id="@+id/action_home_to_map"
+        app:destination="@id/navigation_map" />
+    <action
+        android:id="@+id/action_map_to_camera"
+        app:destination="@id/navigation_camera" />
+    <action
+        android:id="@+id/action_camera_to_map"
+        app:destination="@id/navigation_map" />
+    <action
+        android:id="@+id/action_map_to_home"
+        app:destination="@id/navigation_home" />
+    <action
+        android:id="@+id/action_home_to_create_trip"
+        app:destination="@id/navigation_create_trip" />
 </navigation>
