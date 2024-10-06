@@ -25,13 +25,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);  // 假设你的布局文件命名为 activity_login
 
-        // 检查 savedInstanceState 避免 Fragment 重叠
-        if (savedInstanceState == null) {
-            // 获取 FragmentManager 并加载 LoginFragment
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, new LoginFragment()) // fragment_container 是 activity_login.xml 中的容器ID
-                    .commit();
-        }
+//        // 检查 savedInstanceState 避免 Fragment 重叠
+//        if (savedInstanceState == null) {
+//            // 获取 FragmentManager 并加载 LoginFragment
+//            FragmentManager fragmentManager = getSupportFragmentManager();
+//            fragmentManager.beginTransaction()
+//                    .replace(R.id.fragment_container, new LoginFragment()) // fragment_container 是 activity_login.xml 中的容器ID
+//                    .commit();
+//        }
     }
 }

@@ -15,6 +15,8 @@ import androidx.camera.view.PreviewView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.service.GPTService;
@@ -36,6 +38,7 @@ public class CameraFragment extends Fragment {
     private LocationService locationService;
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Handler mainHandler = new Handler(Looper.getMainLooper());
+    private NavController navController;
 
     @Nullable
     @Override
@@ -47,6 +50,7 @@ public class CameraFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        navController = Navigation.findNavController(requireView());
 
         // 初始化 CameraX 预览
         cameraPreviewView = view.findViewById(R.id.cameraPreviewView);

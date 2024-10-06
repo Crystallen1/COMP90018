@@ -32,7 +32,7 @@
             android:value="AIzaSyAOgJTqwR6bEZ1LKxsfcuhr5UlkEIwbV9I" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".HomeActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -42,7 +42,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".TestMapActivity" />
-        <activity android:name=".HomeActivity" />
+        <activity android:name=".LoginActivity" />
+
 
         <provider
             android:name="androidx.core.content.FileProvider"

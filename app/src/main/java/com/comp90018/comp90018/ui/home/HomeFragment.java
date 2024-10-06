@@ -1,13 +1,16 @@
 // app/src/main/java/com/comp90018/comp90018/ui/home/HomeFragment.java
 package com.comp90018.comp90018.ui.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 // 导入必要的类
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,6 +34,8 @@ public class HomeFragment extends Fragment {
 
     private TripAdapter tripAdapter;
     private List<Trip> tripList;
+    private NavController navController;
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,6 +51,14 @@ public class HomeFragment extends Fragment {
         // 设置 RecyclerView
         setupRecyclerView();
 
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController= Navigation.findNavController(requireView());
+
         // 设置点击事件
         buttonCreateTrip.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,7 +66,7 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "Create Trip Clicked", Toast.LENGTH_SHORT).show();
                 // TODO: 实现导航到 CreateTripFragment
                 // 例如：
-                // Navigation.findNavController(view).navigate(R.id.action_home_to_createTrip);
+                navController.navigate(R.id.action_home_to_create_trip);
             }
         });
 
@@ -63,11 +76,9 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "View All Clicked", Toast.LENGTH_SHORT).show();
                 // TODO: 实现导航到 ViewAllTripsFragment 或类似页面
                 // 例如：
-                // Navigation.findNavController(view).navigate(R.id.action_home_to_viewAllTrips);
+//                Navigation.findNavController(view).navigate(R.id.fragment_create_trip);
             }
         });
-
-        return root;
     }
 
     /**

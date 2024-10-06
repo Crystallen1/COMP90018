@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
@@ -117,9 +116,7 @@
                 android:layout_marginTop="8dp"
                 android:spinnerMode="dropdown"
                 android:padding="12dp"
-                android:minHeight="48dp"
-            />
-
+                android:minHeight="48dp"/>
 
             <!-- Other Feedback 文本框 -->
             <TextView
@@ -150,8 +147,5 @@
                 android:backgroundTint="@color/blue"
                 android:textColor="@android:color/white"/>
         </LinearLayout>
-
     </ScrollView>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
