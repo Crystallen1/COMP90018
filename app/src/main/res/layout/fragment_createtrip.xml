@@ -8,6 +8,8 @@
     android:padding="16dp"
     tools:context=".ui.createTrip.CreateTripFragment">
 
+    
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -111,23 +113,13 @@
             android:id="@+id/button_submit_trip"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Submit"
+            android:text="Next"
             app:cornerRadius="8dp"
             app:layout_constraintTop_toBottomOf="@id/textInputLayout_remarks"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="24dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_cancel_trip"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Cancel"
-            app:cornerRadius="8dp"
-            app:layout_constraintTop_toBottomOf="@id/button_submit_trip"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
