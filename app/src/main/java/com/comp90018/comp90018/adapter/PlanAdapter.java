@@ -1,11 +1,10 @@
 package com.comp90018.comp90018.adapter;
+
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,24 +40,13 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder
         holder.tvLocationTitle.setText(plan.getLocationTitle());
         holder.tvDescription.setText(plan.getDescription());
 
-        // 设置菜单点击事件
-        holder.ivOptionsMenu.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(context, holder.ivOptionsMenu);
-            popup.inflate(R.menu.plan_options); // 绑定菜单资源文件
-            popup.setOnMenuItemClickListener(item -> {
-                int itemId = item.getItemId();
-                if (itemId == R.id.action_edit) {
-                    Toast.makeText(context, "Edit selected for " + plan.getLocationTitle(), Toast.LENGTH_SHORT).show();
-                    // 执行编辑操作
-                    return true;
-                } else if (itemId == R.id.action_delete) {
-                    Toast.makeText(context, "Delete selected for " + plan.getLocationTitle(), Toast.LENGTH_SHORT).show();
-                    // 执行删除操作
-                    return true;
-                }
-                return false;
-            });
-            popup.show();
+        // 设置删除按钮点击事件
+        holder.ivDelete.setOnClickListener(v -> {
+            Toast.makeText(context, "Deleted plan: " + plan.getLocationTitle(), Toast.LENGTH_SHORT).show();
+            // 从列表中移除该计划并通知适配器
+            planList.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, planList.size());
         });
     }
 
@@ -69,14 +57,14 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder
 
     public static class PlanViewHolder extends RecyclerView.ViewHolder {
         TextView tvTime, tvLocationTitle, tvDescription;
-        ImageView ivOptionsMenu;
+        ImageView ivDelete;
 
         public PlanViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTime = itemView.findViewById(R.id.tvTime);
             tvLocationTitle = itemView.findViewById(R.id.tvLocationTitle);
             tvDescription = itemView.findViewById(R.id.tvDescription);
-            ivOptionsMenu = itemView.findViewById(R.id.ivOptionsMenu);
+            ivDelete = itemView.findViewById(R.id.ivDelete);
         }
     }
 }
