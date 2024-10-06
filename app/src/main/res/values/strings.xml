@@ -20,5 +20,13 @@
     <string name="date_range_required">Date Range is required</string>
     <string name="location_required">Location is required</string>
     <string name="trip_created_successfully">Trip Created Successfully</string>
+    <string name="start_date">Start Date</string>
+    <string name="trip_duration">Trip Duration</string>
+    <string name="end_date">End Date</string>
+    <string name="add_to_wishlist">Add to Wishlist</string>
+    <string name="ic_attraction">ICON attraction</string>
+    <string name="attractions">Attractions</string>
+    <string name="wishlist">WishList</string>
+    <string name="attraction_image">Attraction Image</string>
 
 </resources>
