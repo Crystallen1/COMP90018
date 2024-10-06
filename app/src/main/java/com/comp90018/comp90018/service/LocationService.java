@@ -16,11 +16,8 @@ import android.widget.Toast;
 public class LocationService {
     private static final String TAG = "LocationService";
     private LocationListener locationListener;
-
-
     private LocationManager locationManager;
     private Context context;
-
 
     public interface LocationCallback {
         void onLocationResult(Location location);
@@ -42,7 +39,7 @@ public class LocationService {
         }
 
         // 定义LocationListener
-        locationListener = new LocationListener() {
+        this.locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 if (location != null) {

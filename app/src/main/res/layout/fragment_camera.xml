@@ -24,4 +24,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginBottom="16dp"/>
+
+    <!-- Back Button in the top left corner -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/common_google_signin_btn_text_dark"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:contentDescription="Back"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    android:layout_marginTop="16dp"
+    android:layout_marginStart="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

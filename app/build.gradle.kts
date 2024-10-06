@@ -72,4 +72,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:21.1.0")
     implementation("com.google.maps:google-maps-services:2.2.0")
     implementation ("com.google.firebase:firebase-config:21.0.3")
+    implementation ("com.google.firebase:firebase-firestore:24.7.1")
+    implementation ("com.google.firebase:firebase-storage:20.2.1")
+
+
 }

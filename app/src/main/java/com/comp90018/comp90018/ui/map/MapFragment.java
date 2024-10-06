@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.model.Journey;
@@ -48,9 +49,11 @@ public class MapFragment extends Fragment {
     private LocationService locationService;
     private Marker currentLocationMarker;
     private NavigationService navigationService;
+    private MapViewModel mapViewModel;
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
+    GPTService gptService = new GPTService();
 
     @Nullable
     @Override
@@ -58,6 +61,8 @@ public class MapFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+
+        mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         navigationService = new NavigationService();
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
@@ -125,12 +130,12 @@ public class MapFragment extends Fragment {
                             .color(Color.BLUE) // 设置线的颜色，例如蓝色
                             .width(10); // 设置线的宽度，例如10像素;
                     for (NavigationStep route : routes.getNavigationSteps()) {
-                        for (LatLng point: route.getRoutes()) {
+                        for (LatLng point : route.getRoutes()) {
                             polylineOptions.add(point);
                         }
                     }
                     googleMap.addPolyline(polylineOptions);
-            });
+                });
             }
 
             @Override
@@ -186,34 +191,42 @@ public class MapFragment extends Fragment {
     }
     // 将位置添加到地图上
     private void addLocationsToMap() {
-        GPTService gptService = new GPTService();
-
         for (int i = 0; i < journeys.size(); i++) {
             // 创建局部变量，防止闭包问题
             final LatLng location = new LatLng(journeys.get(i).getLatitude(), journeys.get(i).getLongitude());
             final String name = journeys.get(i).getName();
             final String notes = journeys.get(i).getNotes();
 
-            gptService.getJourneyIntroduction(name, notes, new GPTService.GPTCallback() {
-                @Override
-                public void onSuccess(String result) {
-                    // 在地图上添加标记并显示生成的介绍
-                    Marker marker = googleMap.addMarker(new MarkerOptions()
-                            .position(location)
-                            .title(name)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-                    // 保存 Marker 和 生成的信息
-                    markerInfoMap.put(marker, result);
-                }
-                @Override
-                public void onFailure(String error) {
-                    Log.e("GPTService", "Failed to generate introduction: " + error);
-                    // 或者显示一个 Toast 提示用户
-                    Toast.makeText(requireContext(), "Failed to generate introduction", Toast.LENGTH_SHORT).show();                }
-            });
+            if (mapViewModel.hasIntroduction(name)) {
+                // 如果 ViewModel 已经缓存了介绍，则直接使用
+                String cachedIntroduction = mapViewModel.getIntroduction(name);
+                addMarkerWithInfo(location, name, cachedIntroduction);
+            }else{
+                gptService.getJourneyIntroduction(name, notes, new GPTService.GPTCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        mapViewModel.addIntroduction(name, result);  // 缓存结果到 ViewModel
+                        addMarkerWithInfo(location, name, result);
+                        Log.d("GPTService","request gpt api success");
+                    }
+                    @Override
+                    public void onFailure(String error) {
+                        Log.e("GPTService", "Failed to generate introduction: " + error);
+                        // 或者显示一个 Toast 提示用户
+                        Toast.makeText(requireContext(), "Failed to generate introduction", Toast.LENGTH_SHORT).show();                }
+                });
+            }
         }
     }
+
+    private void addMarkerWithInfo(LatLng location, String name, String info) {
+        Marker marker = googleMap.addMarker(new MarkerOptions()
+                .position(location)
+                .title(name)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        markerInfoMap.put(marker, info);
+    }
+
     // 显示自定义的信息窗口
     private void showInfoWindow(Marker marker, String info) {
         // 创建一个自定义布局
@@ -265,17 +278,4 @@ public class MapFragment extends Fragment {
         mapView.onLowMemory();
     }
 
-    // 从 AndroidManifest 中获取 API 密钥的方法
-    private String getApiKeyFromMetaData() {
-        try {
-            // 使用 requireContext() 获取上下文
-            ApplicationInfo appInfo = requireContext().getPackageManager()
-                    .getApplicationInfo(requireContext().getPackageName(), PackageManager.GET_META_DATA);
-            Bundle metaData = appInfo.metaData;
-            return metaData.getString("com.google.android.geo.API_KEY");
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

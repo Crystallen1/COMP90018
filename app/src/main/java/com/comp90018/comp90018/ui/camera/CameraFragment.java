@@ -13,12 +13,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.view.PreviewView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.ImageCaptureService;
 import com.comp90018.comp90018.service.ImageUploadService;
 import com.comp90018.comp90018.service.LocationService;
+import com.comp90018.comp90018.ui.login.RegisterFragment;
+import com.comp90018.comp90018.ui.map.MapFragment;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -54,8 +58,22 @@ public class CameraFragment extends Fragment {
         imageCaptureService = new ImageCaptureService();
         imageUploadService = new ImageUploadService();
         locationService = new LocationService(requireContext());
+        locationService.startLocationUpdates(new LocationService.LocationCallback() {
+            @Override
+            public void onLocationResult(Location location) {
+
+            }
+
+            @Override
+            public void onLocationError(String errorMsg) {
+
+            }
+        });
+
         // 启动 CameraX
         imageCaptureService.startCamera(requireContext(), getViewLifecycleOwner(), cameraPreviewView); // 传递 PreviewView
+        View backButton = view.findViewById(R.id.backButton);
+        backButton.setOnClickListener(v->navigateToMapFragment());
 
         // 设置拍照按钮事件
         View captureButton = view.findViewById(R.id.captureButton);
@@ -92,10 +110,9 @@ public class CameraFragment extends Fragment {
                                                 }
                                             });
                                         }
-
                                         @Override
                                         public void onFailure(String error) {
-                                            Log.e("CameraFragment", "Error in GPT request");
+                                            Log.e("CameraFragment", "Error in GPT request:"+error);
                                             Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
 
                                         }
@@ -128,4 +145,16 @@ public class CameraFragment extends Fragment {
         return cameraPreviewView;
     }
 
+    private void navigateToMapFragment() {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // 创建 RegisterFragment 实例
+        MapFragment mapFragment = new MapFragment();
+
+        // 替换当前 Fragment 并将其添加到返回栈
+        fragmentTransaction.replace(R.id.fragment_container, mapFragment);
+        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
+        fragmentTransaction.commit();
+    }
 }

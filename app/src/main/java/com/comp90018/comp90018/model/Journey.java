@@ -3,19 +3,13 @@ package com.comp90018.comp90018.model;
 import java.util.Date;
 
 public class Journey {
+    private String id;  // 文档 ID
+    private String imageUrl;  // 图片的 URL
+
     private String name;         // 地点名称
     private String notes;        // 备注信息
     private double latitude;     // 纬度
     private double longitude;    // 经度
-    private Date dateTime;       // 时间日期
-
-    public Journey(String name, String notes, double latitude, double longitude, Date dateTime) {
-        this.name = name;
-        this.notes = notes;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.dateTime = dateTime;
-    }
 
     public Journey(String name, String notes, double latitude, double longitude) {
         this.name = name;
@@ -25,6 +19,22 @@ public class Journey {
     }
 
     public Journey() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getName() {
@@ -59,11 +69,4 @@ public class Journey {
         this.longitude = longitude;
     }
 
-    public Date getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(Date dateTime) {
-        this.dateTime = dateTime;
-    }
 }
