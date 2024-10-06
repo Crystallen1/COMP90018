@@ -1,71 +1,126 @@
+// app/src/main/java/com/comp90018/comp90018/ui/home/HomeFragment.java
 package com.comp90018.comp90018.ui.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
+// 导入必要的类
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.comp90018.comp90018.databinding.FragmentHomeBinding;
-import com.google.android.material.button.MaterialButton;
 import com.comp90018.comp90018.R;
+import com.comp90018.comp90018.adapter.TripAdapter;
+import com.comp90018.comp90018.model.Trip;
+import com.google.android.material.button.MaterialButton;
 
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import androidx.navigation.Navigation;
 
 public class HomeFragment extends Fragment {
 
-    private MaterialButton createTripButton;
-    private MaterialButton viewAllButton;
-    private TextView myTripsTitle;
+    private MaterialButton buttonCreateTrip;
+    private MaterialButton buttonViewAll;
     private RecyclerView recyclerViewTrips;
 
-    @Nullable
+    private TripAdapter tripAdapter;
+    private List<Trip> tripList;
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 将fragment_my_trips.xml布局文件转换为View
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        // 填充布局
+        View root = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // 初始化布局中的组件
-        createTripButton = view.findViewById(R.id.button_create_trip);
-        viewAllButton = view.findViewById(R.id.button_view_all);
-        myTripsTitle = view.findViewById(R.id.text_my_trips_title);
-        recyclerViewTrips = view.findViewById(R.id.recycler_view_trips);
+        // 初始化视图
+        buttonCreateTrip = root.findViewById(R.id.button_create_trip);
+        buttonViewAll = root.findViewById(R.id.button_view_all);
+        recyclerViewTrips = root.findViewById(R.id.recycler_view_trips);
 
-        // 设置按钮点击事件
-        createTripButton.setOnClickListener(v -> {
-            // 在这里处理创建新行程的逻辑
-            createNewTrip();
-        });
-
-        viewAllButton.setOnClickListener(v -> {
-            // 在这里处理查看所有行程的逻辑
-            viewAllTrips();
-        });
-
-        // 设置RecyclerView，例如加载数据并适配器
+        // 设置 RecyclerView
         setupRecyclerView();
 
-        return view;
+        // 设置点击事件
+        buttonCreateTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "Create Trip Clicked", Toast.LENGTH_SHORT).show();
+                // TODO: 实现导航到 CreateTripFragment
+                // 例如：
+                // Navigation.findNavController(view).navigate(R.id.action_home_to_createTrip);
+            }
+        });
+
+        buttonViewAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "View All Clicked", Toast.LENGTH_SHORT).show();
+                // TODO: 实现导航到 ViewAllTripsFragment 或类似页面
+                // 例如：
+                // Navigation.findNavController(view).navigate(R.id.action_home_to_viewAllTrips);
+            }
+        });
+
+        return root;
     }
 
-    private void createNewTrip() {
-        // 创建新行程的逻辑
-        // 例如跳转到新的页面或显示一个弹窗
-    }
-
-    private void viewAllTrips() {
-        // 查看所有行程的逻辑
-        // 例如跳转到显示所有行程的页面
-    }
-
+    /**
+     * 设置 RecyclerView
+     */
     private void setupRecyclerView() {
-        // 在这里设置RecyclerView，例如设置LayoutManager和Adapter
-        // recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
-        // recyclerViewTrips.setAdapter(new MyTripsAdapter());
+        // 初始化旅行列表
+        tripList = new ArrayList<>();
+
+        // 添加静态数据
+        tripList.add(new Trip(
+                "Beach Holiday",
+                "2024-06-01",
+                "2024-06-10",
+                "Miami Beach",
+                "Enjoy the sunny beaches.",
+                R.drawable.ic_calendar // 确保此 drawable 存在
+        ));
+        tripList.add(new Trip(
+                "Mountain Trek",
+                "2024-07-15",
+                "2024-07-20",
+                "Rocky Mountains",
+                "Hike through scenic trails.",
+                R.drawable.ic_calendar // 确保此 drawable 存在
+        ));
+        tripList.add(new Trip(
+                "City Tour",
+                "2024-08-05",
+                "2024-08-12",
+                "New York City",
+                "Explore the vibrant city life.",
+                R.drawable.ic_calendar // 确保此 drawable 存在
+        ));
+
+        // 初始化适配器
+        tripAdapter = new TripAdapter(getContext(), tripList, new TripAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Trip trip) {
+                // 处理点击事件，例如导航到详细信息页面
+                Toast.makeText(getContext(), "Clicked: " + trip.getTitle(), Toast.LENGTH_SHORT).show();
+                // TODO: 实现导航逻辑，例如使用 Navigation Component 进行导航
+                // 例如：
+                // Bundle bundle = new Bundle();
+                // bundle.putParcelable("trip", trip); // 假设 Trip 实现了 Parcelable
+                // Navigation.findNavController(getView()).navigate(R.id.action_home_to_tripDetails, bundle);
+            }
+        });
+
+        // 设置布局管理器
+        recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // 设置适配器
+        recyclerViewTrips.setAdapter(tripAdapter);
     }
 }
