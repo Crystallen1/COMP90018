@@ -74,5 +74,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-config:21.0.3")
     implementation ("com.google.firebase:firebase-firestore:24.7.1")
     implementation ("com.google.firebase:firebase-storage:20.2.1")
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1") // 如果使用 Kotlin，请使用 kapt 替代 annotationProcessor
 
 }
