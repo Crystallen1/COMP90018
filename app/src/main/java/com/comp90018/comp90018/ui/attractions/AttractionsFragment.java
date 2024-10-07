@@ -10,11 +10,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.comp90018.comp90018.HomeViewModel;
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.adapter.AttractionsAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -25,9 +27,9 @@ import java.util.List;
 public class AttractionsFragment extends Fragment {
 
     private RecyclerView recyclerViewAttractions;
-    private FloatingActionButton fabWishlist;
     private NavController navController;
     private ImageButton btnBack;
+    private HomeViewModel viewModel;
 
     @Nullable
     @Override
@@ -37,7 +39,6 @@ public class AttractionsFragment extends Fragment {
         // 初始化视图
         btnBack = view.findViewById(R.id.btnBack);
         recyclerViewAttractions = view.findViewById(R.id.recyclerView_attractions);
-        fabWishlist = view.findViewById(R.id.fab_wishlist);
 
         // 设置RecyclerView
         setupRecyclerView();
@@ -48,22 +49,18 @@ public class AttractionsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
         navController= Navigation.findNavController(requireView());
 
         // 设置按钮点击事件
         btnBack.setOnClickListener(v -> navController.navigate(R.id.action_attraction_to_duration));
-
-        fabWishlist.setOnClickListener(v -> {
-            // 点击心愿单按钮后的逻辑
-            Toast.makeText(getContext(), "Wishlist clicked!", Toast.LENGTH_SHORT).show();
-        });
 
     }
 
     private void setupRecyclerView() {
         // 设置RecyclerView的布局管理器为 GridLayoutManager，列数为2
         recyclerViewAttractions.setLayoutManager(new GridLayoutManager(getContext(), 2));
-
+//
         // 模拟景点数据
         List<String> attractionList = getAttractions();
 //

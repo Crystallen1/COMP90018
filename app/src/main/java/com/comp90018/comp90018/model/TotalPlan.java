@@ -9,6 +9,24 @@ public class TotalPlan {
     private Date endDate;
     private int duration;
     private String city;
+    private String name;
+    private String mode;
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getCity() {
         return city;

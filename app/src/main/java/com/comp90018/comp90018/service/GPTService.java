@@ -37,7 +37,7 @@ public class GPTService {
 
     public GPTService() {
         apiKeyFuture = new CompletableFuture<>();
-        apiKeyService.enable();
+        apiKeyService.disable();
         apiKeyService.getApiKey("GPT_API_KEY", new ApiKeyService.ApiKeyCallback() {
             @Override
             public void onApiKeyRetrieved(String apiKey) {

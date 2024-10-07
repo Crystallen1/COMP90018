@@ -39,7 +39,7 @@ public class ViewpointService {
 
     // 获取指定城市的所有 Journey 数据和图片
     public void getJourneysByCity(String cityName, final JourneyCallback callback) {
-        firestore.collection("journey")
+        firestore.collection("Journey")
                 .whereEqualTo("city", cityName)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -55,7 +55,7 @@ public class ViewpointService {
                                 journeyData.setId(documentId);
 
                                 // 从 Storage 获取图片
-                                StorageReference imageRef = storage.getReference().child("journey_images/" + documentId + ".jpg");
+                                StorageReference imageRef = storage.getReference().child("images/"+cityName+"/" + documentId + ".jpeg");
 
                                 imageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override

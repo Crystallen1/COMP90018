@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.model.Journey;
@@ -26,6 +28,7 @@ import com.comp90018.comp90018.model.NavigationStep;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
 import com.comp90018.comp90018.service.NavigationService;
+import com.comp90018.comp90018.ui.DialogFragment.LocationInputDialogFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -38,6 +41,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +54,11 @@ public class MapFragment extends Fragment {
     private Marker currentLocationMarker;
     private NavigationService navigationService;
     private MapViewModel mapViewModel;
+    private FloatingActionButton fabButton1;
+    private FloatingActionButton fabButton2;
+    private FloatingActionButton fabButton3;
+    private NavController navController;
+
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
@@ -105,7 +114,7 @@ public class MapFragment extends Fragment {
                         return false;  // 返回 false 以继续显示默认的 InfoWindow
                     }
                 });
-                displayRoute("Sydney", "Melbourne");
+//                displayRoute("Sydney", "Melbourne");
             }
         });
 
@@ -119,6 +128,29 @@ public class MapFragment extends Fragment {
 
 
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController= androidx.navigation.Navigation.findNavController(requireView());
+        fabButton1 = view.findViewById(R.id.fab_button1);
+        fabButton2 = view.findViewById(R.id.fab_button2);
+        fabButton3 = view.findViewById(R.id.fab_button3);
+
+        fabButton1.setOnClickListener(view1 -> navController.navigate(R.id.action_map_to_camera));
+        fabButton2.setOnClickListener(v -> {
+            LocationInputDialogFragment dialog = new LocationInputDialogFragment();
+
+            // 设置数据回调监听器
+            dialog.setOnLocationSetListener((startLocation, endLocation) -> {
+                // 更新UI，显示用户输入的起点和终点
+                displayRoute(startLocation,endLocation);
+            });
+
+            // 显示对话框
+            dialog.show(getChildFragmentManager(), "LocationInputDialog");
+        });
     }
 
     private void displayRoute(String origin, String destination) {

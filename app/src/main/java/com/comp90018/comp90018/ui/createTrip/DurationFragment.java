@@ -13,10 +13,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.comp90018.comp90018.HomeViewModel;
 import com.comp90018.comp90018.R;
+import com.comp90018.comp90018.model.TotalPlan;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -32,6 +35,7 @@ public class DurationFragment extends Fragment {
     private ImageButton btnBack;
     private MaterialButton buttonBack;
     private MaterialButton buttonNext;
+    private HomeViewModel viewModel;
 
     @Nullable
     @Override
@@ -54,9 +58,8 @@ public class DurationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
         navController= Navigation.findNavController(requireView());
-
-
 
         // 设置返回按钮点击事件
         btnBack.setOnClickListener(v -> {
@@ -77,7 +80,6 @@ public class DurationFragment extends Fragment {
         buttonNext.setOnClickListener(v -> {
             // 验证输入日期或执行其他逻辑
             if (validateDates()) {
-                navController.navigate(R.id.action_duration_to_attraction);
                 Toast.makeText(getContext(), "Next button clicked", Toast.LENGTH_SHORT).show();
                 // 执行下一步操作，或者导航到下一步的Fragment
             } else {
@@ -85,6 +87,16 @@ public class DurationFragment extends Fragment {
                 Toast.makeText(getContext(), "Please enter valid dates", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void navigationToAttraction(){
+        TotalPlan totalPlan = viewModel.getTotalPlan().getValue();
+        totalPlan.setStartDate(calendarStart.getTime());
+        totalPlan.setEndDate(calendarEnd.getTime());
+        long durationInMillis = calendarEnd.getTimeInMillis() - calendarStart.getTimeInMillis();
+        totalPlan.setDuration(Math.toIntExact(durationInMillis / (1000 * 60 * 60 * 24)));
+        viewModel.updateLiveData(totalPlan);
+        navController.navigate(R.id.action_duration_to_attraction);
     }
 
     private void setupDatePicker() {

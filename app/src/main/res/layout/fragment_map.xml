@@ -1,12 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.map.MapFragment">
 
+    <!-- MapView 显示地图 -->
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+    <!-- 悬浮按钮的容器 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="end|bottom"
+        android:layout_gravity="end|bottom">
+
+        <!-- 第一个悬浮按钮 -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/common_google_signin_btn_text_disabled"
+            app:tint="@android:color/white"
+            app:backgroundTint="@color/blue"
+            android:contentDescription="Button 1" />
+
+        <!-- 第二个悬浮按钮 -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/common_google_signin_btn_icon_dark_focused"
+            app:tint="@android:color/white"
+            app:backgroundTint="@color/blue"
+            android:layout_marginTop="16dp"
+            android:contentDescription="Button 2" />
+
+        <!-- 第三个悬浮按钮 -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/common_google_signin_btn_text_dark_focused"
+            app:tint="@android:color/white"
+            app:backgroundTint="@color/blue"
+            android:layout_marginTop="16dp"
+            android:contentDescription="Button 3" />
+    </LinearLayout>
+
+</FrameLayout>

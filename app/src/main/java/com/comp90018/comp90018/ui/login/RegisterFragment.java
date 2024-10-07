@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ public class RegisterFragment  extends Fragment {
     private TextInputEditText etPassword;
     private TextInputEditText etConfirmPassword;
     private Button btnSignUp;
+    private ImageButton btnBack;
     private ProgressBar progressBar;
     private AuthenticationService authenticationService;
     private NavController navController;
@@ -50,6 +52,7 @@ public class RegisterFragment  extends Fragment {
         etConfirmPassword = view.findViewById(R.id.etConfirmPassword);
         btnSignUp = view.findViewById(R.id.btnSignUp);
         progressBar = view.findViewById(R.id.progressBar);
+        btnBack = view.findViewById(R.id.btnBack);
 
         // 设置按钮点击事件
         btnSignUp.setOnClickListener(new View.OnClickListener() {
@@ -113,5 +116,6 @@ public class RegisterFragment  extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         navController = Navigation.findNavController(requireView());
 
+        btnBack.setOnClickListener(v-> navController.navigate(R.id.action_register_to_login));
     }
 }
