@@ -80,10 +80,10 @@ public class DurationFragment extends Fragment {
         buttonNext.setOnClickListener(v -> {
             // 验证输入日期或执行其他逻辑
             if (validateDates()) {
+                navigationToAttraction();
                 Toast.makeText(getContext(), "Next button clicked", Toast.LENGTH_SHORT).show();
                 // 执行下一步操作，或者导航到下一步的Fragment
             } else {
-                navController.navigate(R.id.action_duration_to_attraction);
                 Toast.makeText(getContext(), "Please enter valid dates", Toast.LENGTH_SHORT).show();
             }
         });
