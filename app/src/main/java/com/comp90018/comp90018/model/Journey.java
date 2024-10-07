@@ -25,6 +25,22 @@ public class Journey implements Parcelable {
     public Journey() {
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Journey journey = (Journey) o;
+
+        return id != null ? id.equals(journey.id) : journey.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+
+
     // Getter 和 Setter
     public String getId() {
         return id;

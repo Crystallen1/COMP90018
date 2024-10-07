@@ -12,12 +12,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
+import com.comp90018.comp90018.HomeViewModel;
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.model.Journey;
+
+import java.util.Set;
 
 public class DetailFragment extends Fragment {
 
@@ -26,6 +30,7 @@ public class DetailFragment extends Fragment {
     private TextView textViewDetailName, textViewDetailLocation, textViewAboutContent;
     private Button buttonWishlist;
     private NavController navController;
+    private HomeViewModel viewModel;
 
 
     private boolean isInWishlist = false; // 用于模拟是否在愿望清单中的状态
@@ -44,19 +49,30 @@ public class DetailFragment extends Fragment {
         textViewAboutContent = view.findViewById(R.id.textView_about_content);
         buttonWishlist = view.findViewById(R.id.button_wishlist);
 
+        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+
+
         // 设置返回按钮的点击事件
         btnBackDetail.setOnClickListener(v -> {
             // 返回上一个 Fragment
             NavController navController = Navigation.findNavController(v);
             navController.popBackStack();
         });
+        Journey journey = getArguments().getParcelable("journey");
+
+        if (isInWishlist(journey)) {
+            // 如果已经在愿望清单中，移除
+            buttonWishlist.setText("Remove from Wishlist");
+        } else {
+            // 如果不在愿望清单中，添加
+            buttonWishlist.setText("Add to Wishlist");
+        }
 
         // 处理 "Add to Wishlist" 按钮点击事件
         buttonWishlist.setOnClickListener(v -> toggleWishlist());
 
         // 从 Bundle 中获取数据并显示在界面上
         if (getArguments() != null) {
-            Journey journey = getArguments().getParcelable("journey");
 
             // 设置景点名称、位置和描述
             textViewDetailName.setText(journey.getName());
@@ -85,17 +101,27 @@ public class DetailFragment extends Fragment {
      * 切换愿望清单状态的逻辑
      */
     private void toggleWishlist() {
-        if (isInWishlist) {
+        Journey journey = getArguments().getParcelable("journey");
+
+        if (isInWishlist(journey)) {
             // 如果已经在愿望清单中，移除
+            viewModel.removeWishListJourney(journey);
             buttonWishlist.setText("Add to Wishlist");
             Toast.makeText(getContext(), "Removed from Wishlist", Toast.LENGTH_SHORT).show();
         } else {
             // 如果不在愿望清单中，添加
+            viewModel.addWishListJourney(journey);
             buttonWishlist.setText("Remove from Wishlist");
             Toast.makeText(getContext(), "Added to Wishlist", Toast.LENGTH_SHORT).show();
         }
 
         // 切换状态
         isInWishlist = !isInWishlist;
+    }
+
+    private boolean isInWishlist(Journey journey){
+        Set<Journey> journeys = viewModel.getWishListJourneys().getValue();
+        if (journeys.contains(journey))return true;
+        else return false;
     }
 }

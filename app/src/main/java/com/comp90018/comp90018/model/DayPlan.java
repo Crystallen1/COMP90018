@@ -2,10 +2,11 @@ package com.comp90018.comp90018.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class DayPlan {
     private Date date;
-    private List<Journey> journeys;
+    private Set<Journey> journeys;
 
 
     public Date getDate() {
@@ -16,11 +17,11 @@ public class DayPlan {
         this.date = date;
     }
 
-    public List<Journey> getJourneys() {
+    public Set<Journey> getJourneys() {
         return journeys;
     }
 
-    public void setJourneys(List<Journey> journeys) {
+    public void setJourneys(Set<Journey> journeys) {
         this.journeys = journeys;
     }
 }

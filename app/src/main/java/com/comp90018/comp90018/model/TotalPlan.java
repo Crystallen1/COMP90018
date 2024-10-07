@@ -1,10 +1,11 @@
 package com.comp90018.comp90018.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class TotalPlan {
-    private List<DayPlan> dayPlans;
+    private List<DayPlan> dayPlans = new ArrayList<>();
     private Date startDate;
     private Date endDate;
     private int duration;
@@ -42,6 +43,9 @@ public class TotalPlan {
 
     public void setDayPlans(List<DayPlan> dayPlans) {
         this.dayPlans = dayPlans;
+    }
+    public void addDayPlans(DayPlan dayPlans) {
+        this.dayPlans.add(dayPlans);
     }
 
     public Date getStartDate() {
