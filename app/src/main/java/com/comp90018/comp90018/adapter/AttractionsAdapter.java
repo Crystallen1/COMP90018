@@ -3,12 +3,14 @@
 package com.comp90018.comp90018.adapter;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.navigation.NavController;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,11 +23,13 @@ public class AttractionsAdapter extends RecyclerView.Adapter<AttractionsAdapter.
 
     private Context context;
     private List<Journey> journeyList;
+    private NavController navController;
 
     // Constructor
-    public AttractionsAdapter(Context context, List<Journey> journeyList) {
+    public AttractionsAdapter(Context context, List<Journey> journeyList, NavController navController) {
         this.context = context;
         this.journeyList = journeyList;
+        this.navController = navController; // 接收 NavController
     }
 
     // ViewHolder class
@@ -58,7 +62,16 @@ public class AttractionsAdapter extends RecyclerView.Adapter<AttractionsAdapter.
         // Set the attraction name and notes
         holder.textViewName.setText(journey.getName());
         holder.textViewNotes.setText(journey.getNotes());
+        holder.itemView.setOnClickListener(v->navigationToDetail());
+        // 设置点击事件，导航到 DetailFragment
+        holder.itemView.setOnClickListener(v -> {
+            // 设置 Bundle 传递参数（可选）
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("journey", journey);  // 传递自定义对象
 
+            // 使用 NavController 进行导航
+            navController.navigate(R.id.action_attraction_to_attraction_detail, bundle);
+        });
 
         // Load the image using Glide
         // You can add placeholder and error images as needed
@@ -67,6 +80,10 @@ public class AttractionsAdapter extends RecyclerView.Adapter<AttractionsAdapter.
                 .placeholder(R.drawable.ic_calendar) // Optional placeholder
                 .error(R.drawable.ic_back) // Optional error image
                 .into(holder.imageViewAttraction);
+    }
+
+    private void navigationToDetail() {
+
     }
 
     @Override

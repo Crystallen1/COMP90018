@@ -92,17 +92,23 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.comp90018.comp90018.HomeViewModel;
 import com.comp90018.comp90018.adapter.AttractionsAdapter;
 import com.comp90018.comp90018.model.Journey;
+import com.comp90018.comp90018.model.TotalPlan;
 import com.comp90018.comp90018.service.ViewpointService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.comp90018.comp90018.R;
+import com.google.android.material.button.MaterialButton;
 
 public class AttractionsFragment extends Fragment {
 
@@ -111,6 +117,11 @@ public class AttractionsFragment extends Fragment {
     private AttractionsAdapter attractionsAdapter;
     private List<Journey> journeyList;
     private ViewpointService viewpointService;
+    private MaterialButton backButton;
+    private MaterialButton nextButton;
+    private HomeViewModel viewModel;
+    private NavController navController;
+
 
     @Nullable
     @Override
@@ -125,6 +136,13 @@ public class AttractionsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        TotalPlan totalPlan = viewModel.getTotalPlan().getValue();
+        navController= Navigation.findNavController(requireView());
+
+        backButton = view.findViewById(R.id.button_back);
+        nextButton = view.findViewById(R.id.button_next);
+
         // 初始化 RecyclerView
         recyclerViewAttractions = view.findViewById(R.id.recyclerView_attractions);
         recyclerViewAttractions.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -132,7 +150,7 @@ public class AttractionsFragment extends Fragment {
 
         // 初始化数据列表和适配器
         journeyList = new ArrayList<>();
-        attractionsAdapter = new AttractionsAdapter(getContext(), journeyList);
+        attractionsAdapter = new AttractionsAdapter(getContext(), journeyList,navController);
         recyclerViewAttractions.setAdapter(attractionsAdapter);
         Log.d(TAG, "onViewCreated: Adapter已设置。");
 
@@ -141,7 +159,16 @@ public class AttractionsFragment extends Fragment {
 
         // 获取指定城市的 Journeys，例如 "Sydney"
         String cityName = "Melbourne";
-        loadJourneys(cityName);
+        loadJourneys(totalPlan.getCity());
+
+        nextButton.setOnClickListener(v->navigationToPlan());
+        backButton.setOnClickListener(v->navController.navigate(R.id.action_attraction_to_duration));
+    }
+
+    private void navigationToPlan() {
+        TotalPlan totalPlan = viewModel.getTotalPlan().getValue();
+
+        navController.navigate(R.id.action_attraction_to_plan);
     }
 
     private void loadJourneys(String cityName) {

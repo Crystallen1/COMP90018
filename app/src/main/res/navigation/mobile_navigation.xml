@@ -106,5 +106,12 @@
     <action
         android:id="@+id/action_feedback_to_plan"
         app:destination="@id/navigation_plan" />
+    <action
+        android:id="@+id/action_attraction_to_attraction_detail"
+        app:destination="@id/navigation_detail" />
+    <action
+        android:id="@+id/action_attraction_detail_to_attraction"
+        app:destination="@id/navigation_attraction" />
+
 
 </navigation>

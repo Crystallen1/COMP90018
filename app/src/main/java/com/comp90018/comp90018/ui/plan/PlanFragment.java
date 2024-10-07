@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ public class PlanFragment extends Fragment {
     private List<Plan> planList;
     private Calendar calendar = Calendar.getInstance(); // 用于保存选中的日期
     private NavController navController;
+    private ImageButton backButton;
 
     @Nullable
     @Override
@@ -70,6 +72,10 @@ public class PlanFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         navController = Navigation.findNavController(requireView());
+
+        backButton = view.findViewById(R.id.btnBack);
+
+        backButton.setOnClickListener(v->navController.navigate(R.id.action_plan_to_home));
     }
 
     // 显示添加计划的底部对话框
