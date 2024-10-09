@@ -48,7 +48,6 @@ public class NavigationService {
            public void onFailure(Exception e) {
                 Log.e(TAG, "fail to get the map api key:"+e);
                apiKeyFuture.completeExceptionally(new RuntimeException("Failed to fetch API key"));
-
            }
        });
     }

@@ -58,7 +58,7 @@ public class PlanFragment extends Fragment {
         planList.add(new Plan("2024-10-10", "Yarra Valley", "Wine Tasting"));
 
         // 设置适配器
-        planAdapter = new PlanAdapter(getContext(), planList);
+        planAdapter = new PlanAdapter(getContext(), planList,navController);
         recyclerView.setAdapter(planAdapter);
 
         // 浮动按钮用于添加计划

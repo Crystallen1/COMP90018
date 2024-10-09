@@ -3,6 +3,7 @@ package com.comp90018.comp90018.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.adapter.TripAdapter;
+import com.comp90018.comp90018.model.DayPlan;
+import com.comp90018.comp90018.model.TotalPlan;
 import com.comp90018.comp90018.model.Trip;
+import com.comp90018.comp90018.service.FirebaseService;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import android.widget.Toast;
 
@@ -88,50 +93,27 @@ public class HomeFragment extends Fragment {
         // 初始化旅行列表
         tripList = new ArrayList<>();
 
-        // 添加静态数据
-        tripList.add(new Trip(
-                "Beach Holiday",
-                "2024-06-01",
-                "2024-06-10",
-                "Miami Beach",
-                "Enjoy the sunny beaches.",
-                R.drawable.ic_calendar // 确保此 drawable 存在
-        ));
-        tripList.add(new Trip(
-                "Mountain Trek",
-                "2024-07-15",
-                "2024-07-20",
-                "Rocky Mountains",
-                "Hike through scenic trails.",
-                R.drawable.ic_calendar // 确保此 drawable 存在
-        ));
-        tripList.add(new Trip(
-                "City Tour",
-                "2024-08-05",
-                "2024-08-12",
-                "New York City",
-                "Explore the vibrant city life.",
-                R.drawable.ic_calendar // 确保此 drawable 存在
-        ));
+// 获取数据并设置适配器
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // 当前用户ID
+        FirebaseService.getInstance().getAllTotalPlans(userId,
+                totalPlans -> {
+                    // 将获取到的 totalPlans 传递给适配器
+                    tripAdapter = new TripAdapter(getContext(), totalPlans, new TripAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(TotalPlan totalPlan) {
+                            // 处理点击事件
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable("totalPlan", totalPlan);
+                            Navigation.findNavController(getView()).navigate(R.id.action_home_to_plan, bundle);
+                        }
+                    }, navController);
 
-        // 初始化适配器
-        tripAdapter = new TripAdapter(getContext(), tripList, new TripAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Trip trip) {
-                // 处理点击事件，例如导航到详细信息页面
-                Toast.makeText(getContext(), "Clicked: " + trip.getTitle(), Toast.LENGTH_SHORT).show();
-                // TODO: 实现导航逻辑，例如使用 Navigation Component 进行导航
-                // 例如：
-                // Bundle bundle = new Bundle();
-                // bundle.putParcelable("trip", trip); // 假设 Trip 实现了 Parcelable
-                // Navigation.findNavController(getView()).navigate(R.id.action_home_to_tripDetails, bundle);
-            }
-        });
-
-        // 设置布局管理器
-        recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 设置适配器
-        recyclerViewTrips.setAdapter(tripAdapter);
+                    // 设置布局管理器和适配器
+                    recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
+                    recyclerViewTrips.setAdapter(tripAdapter);
+                },
+                e -> {
+                    Log.w("PlanService", "Error getting documents", e);
+                });
     }
 }

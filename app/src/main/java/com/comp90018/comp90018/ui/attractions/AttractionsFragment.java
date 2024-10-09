@@ -103,14 +103,21 @@ import com.comp90018.comp90018.adapter.AttractionsAdapter;
 import com.comp90018.comp90018.model.DayPlan;
 import com.comp90018.comp90018.model.Journey;
 import com.comp90018.comp90018.model.TotalPlan;
+import com.comp90018.comp90018.service.FirebaseService;
+import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.ViewpointService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.comp90018.comp90018.R;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class AttractionsFragment extends Fragment {
 
@@ -123,7 +130,6 @@ public class AttractionsFragment extends Fragment {
     private MaterialButton nextButton;
     private HomeViewModel viewModel;
     private NavController navController;
-
 
     @Nullable
     @Override
@@ -174,12 +180,39 @@ public class AttractionsFragment extends Fragment {
     private void navigationToPlan() {
         TotalPlan totalPlan = viewModel.getTotalPlan().getValue();
         Set<Journey> journeys = viewModel.getWishListJourneys().getValue();
+        Map<String,Journey> journeyMap = convertSetToMap(journeys);
+        totalPlan.setTargetViewPoint(journeyMap);
 
-        DayPlan dayPlan  = new DayPlan();
-        dayPlan.setJourneys(journeys);
-        dayPlan.setDate(viewModel.getTotalPlan().getValue().getStartDate());
-        totalPlan.addDayPlans(dayPlan);
+        GPTService.getInstance().getDayJourneyPlan(totalPlan, new GPTService.GPTCallback() {
+            @Override
+            public void onSuccess(String result) {
+                Log.d(TAG,result);
+                List<Journey> journeySet = parseResultToJourneys(result,totalPlan.getTargetViewPoint());
+                DayPlan dayPlan  = new DayPlan();
+                dayPlan.setJourneys(journeySet);
+                dayPlan.setDate(viewModel.getTotalPlan().getValue().getStartDate());
+                totalPlan.addDayPlans(dayPlan);
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // 当前用户ID
 
+                FirebaseService.getInstance().uploadTotalPlan(totalPlan,userId,
+                        documentReference -> {
+                            // 处理 DocumentReference，例如输出新文档的 ID
+                            Log.d("PlanService", "DocumentSnapshot written with ID: " + documentReference.getId());
+                            Toast.makeText(getContext(), "TotalPlan saved successfully!", Toast.LENGTH_SHORT).show();
+                        },
+                        e -> {
+                            Log.w("PlanService", "Error adding document", e);
+                            Toast.makeText(getContext(), "Failed to save TotalPlan", Toast.LENGTH_SHORT).show();
+                        });
+            }
+
+            @Override
+            public void onFailure(String error) {
+
+            }
+        });
+
+        viewModel.updateLiveData(totalPlan);
         navController.navigate(R.id.action_attraction_to_plan);
     }
 
@@ -198,6 +231,7 @@ public class AttractionsFragment extends Fragment {
                 }
             }
 
+
             @Override
             public void onFailure(String error) {
                 if (getActivity() != null) {
@@ -208,5 +242,38 @@ public class AttractionsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public Map<String, Journey> convertSetToMap(Set<Journey> journeys) {
+        Map<String, Journey> journeyMap = new HashMap<>();
+        int index = 1; // 用来作为Map的key值，从1开始编号
+        for (Journey journey : journeys) {
+            journeyMap.put(String.valueOf(index++), journey); // 将 int 转换为 String 作为键
+        }
+        return journeyMap;
+    }
+
+    public List<Journey> parseResultToJourneys(String result, Map<String, Journey> journeyMap) {
+        List<Journey> journeyList = new ArrayList<>();
+
+        // 拆分 result 字符串，去掉空格并按逗号、回车或换行符分隔
+        String[] ids = result.split("[,\\s]+");
+
+        // 遍历解析的编号，检查是否为有效数字，获取对应的 Journey 对象并添加到列表中
+        for (String idStr : ids) {
+            // 使用正则表达式检查是否是数字
+            if (idStr.matches("\\d+")) { // 仅匹配数字
+                Journey journey = journeyMap.get(idStr); // 直接使用字符串从 map 中获取 Journey
+                if (journey != null) {
+                    journeyList.add(journey); // 添加到结果列表
+                } else {
+                    Log.e("PlanService", "No Journey found for ID: " + idStr);
+                }
+            } else {
+                Log.e("PlanService", "Ignoring non-numeric ID: " + idStr);
+            }
+        }
+
+        return journeyList;
     }
 }

@@ -72,6 +72,9 @@
     <action
         android:id="@+id/action_home_to_create_trip"
         app:destination="@id/navigation_create_trip" />
+    <action
+        android:id="@+id/action_home_to_plan"
+        app:destination="@id/navigation_plan" />
 
     <action
         android:id="@+id/action_create_trip_to_home"

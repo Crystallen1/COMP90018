@@ -38,7 +38,7 @@ public class TestGPTActivity extends AppCompatActivity {
         // 在后台执行网络请求
         executorService.execute(() -> {
             // 在后台线程中调用 getImageBasedJourneyIntroduction
-            GPTService gptService = new GPTService();
+            GPTService gptService = GPTService.getInstance();
 //            String result = gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude);
 
             // 使用Handler回到主线程更新UI

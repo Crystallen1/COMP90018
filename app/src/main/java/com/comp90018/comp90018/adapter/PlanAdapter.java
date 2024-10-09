@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.comp90018.comp90018.R;
@@ -20,10 +21,13 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder
 
     private Context context;
     private List<Plan> planList;
+    private NavController navController;
 
-    public PlanAdapter(Context context, List<Plan> planList) {
+    public PlanAdapter(Context context, List<Plan> planList,NavController navController) {
         this.context = context;
         this.planList = planList;
+        this.navController = navController; // 接收 NavController
+
     }
 
     @NonNull

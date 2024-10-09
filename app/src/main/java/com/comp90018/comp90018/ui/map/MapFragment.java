@@ -62,7 +62,7 @@ public class MapFragment extends Fragment {
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
-    GPTService gptService = new GPTService();
+    GPTService gptService = GPTService.getInstance();
 
     @Nullable
     @Override

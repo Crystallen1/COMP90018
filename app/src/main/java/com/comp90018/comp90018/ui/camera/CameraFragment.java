@@ -97,7 +97,7 @@ public class CameraFragment extends Fragment {
                                     double latitude = location.getLatitude();
                                     double longitude = location.getLongitude();
 
-                                    GPTService gptService = new GPTService();
+                                    GPTService gptService = GPTService.getInstance();
                                     gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude, new GPTService.GPTCallback() {
                                         @Override
                                         public void onSuccess(String result) {
