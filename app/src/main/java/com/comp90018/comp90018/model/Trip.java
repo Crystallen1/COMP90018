@@ -1,52 +1,45 @@
+// app/src/main/java/com/comp90018/comp90018/model/Trip.java
 package com.comp90018.comp90018.model;
 
-import java.util.List;
-
 public class Trip {
-    private TotalPlan totalPlan;
-    private List<DetailedList> detailedLists;
-    private List<Bill> bills;
-    private TodayInfo todayInfo;
+    private String title;
+    private String startDate;
+    private String endDate;
+    private String location;
+    private String remarks;
+    private int thumbnailResId; // 本地资源图片 ID
 
-    public Trip(TotalPlan totalPlan, List<DetailedList> detailedLists, List<Bill> bills, TodayInfo todayInfo) {
-        this.totalPlan = totalPlan;
-        this.detailedLists = detailedLists;
-        this.bills = bills;
-        this.todayInfo = todayInfo;
+    public Trip(String title, String startDate, String endDate, String location, String remarks, int thumbnailResId) {
+        this.title = title;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.location = location;
+        this.remarks = remarks;
+        this.thumbnailResId = thumbnailResId;
     }
 
-    public Trip() {
+    // Getter 方法
+    public String getTitle() {
+        return title;
     }
 
-    public List<DetailedList> getDetailedLists() {
-        return detailedLists;
+    public String getStartDate() {
+        return startDate;
     }
 
-    public void setDetailedLists(List<DetailedList> detailedLists) {
-        this.detailedLists = detailedLists;
+    public String getEndDate() {
+        return endDate;
     }
 
-    public TotalPlan getTotalPlan() {
-        return totalPlan;
+    public String getLocation() {
+        return location;
     }
 
-    public void setTotalPlan(TotalPlan totalPlan) {
-        this.totalPlan = totalPlan;
+    public String getRemarks() {
+        return remarks;
     }
 
-    public List<Bill> getBills() {
-        return bills;
-    }
-
-    public void setBills(List<Bill> bills) {
-        this.bills = bills;
-    }
-
-    public TodayInfo getTodayInfo() {
-        return todayInfo;
-    }
-
-    public void setTodayInfo(TodayInfo todayInfo) {
-        this.todayInfo = todayInfo;
+    public int getThumbnailResId() {
+        return thumbnailResId;
     }
 }

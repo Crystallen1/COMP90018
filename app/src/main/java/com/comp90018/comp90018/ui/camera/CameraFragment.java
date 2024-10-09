@@ -13,12 +13,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.view.PreviewView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.ImageCaptureService;
 import com.comp90018.comp90018.service.ImageUploadService;
 import com.comp90018.comp90018.service.LocationService;
+import com.comp90018.comp90018.ui.login.RegisterFragment;
+import com.comp90018.comp90018.ui.map.MapFragment;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -29,8 +35,10 @@ public class CameraFragment extends Fragment {
     private ImageCaptureService imageCaptureService;
     private ImageUploadService imageUploadService;
     private PreviewView cameraPreviewView;
+    private LocationService locationService;
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Handler mainHandler = new Handler(Looper.getMainLooper());
+    private NavController navController;
 
     @Nullable
     @Override
@@ -42,6 +50,7 @@ public class CameraFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        navController = Navigation.findNavController(requireView());
 
         // 初始化 CameraX 预览
         cameraPreviewView = view.findViewById(R.id.cameraPreviewView);
@@ -52,8 +61,23 @@ public class CameraFragment extends Fragment {
         }
         imageCaptureService = new ImageCaptureService();
         imageUploadService = new ImageUploadService();
+        locationService = new LocationService(requireContext());
+        locationService.startLocationUpdates(new LocationService.LocationCallback() {
+            @Override
+            public void onLocationResult(Location location) {
+
+            }
+
+            @Override
+            public void onLocationError(String errorMsg) {
+
+            }
+        });
+
         // 启动 CameraX
         imageCaptureService.startCamera(requireContext(), getViewLifecycleOwner(), cameraPreviewView); // 传递 PreviewView
+        View backButton = view.findViewById(R.id.backButton);
+        backButton.setOnClickListener(v->navigateToMapFragment());
 
         // 设置拍照按钮事件
         View captureButton = view.findViewById(R.id.captureButton);
@@ -67,26 +91,40 @@ public class CameraFragment extends Fragment {
                         @Override
                         public void onSuccess(String imageUrl) {
                             // Now pass the image URL to GPT to get a journey introduction
-                            double latitude = 44;  // Obtain latitude
-                            double longitude = 10;  // Obtain longitude
-                            // 在后台线程中执行GPT请求
-                            executorService.execute(() -> {
-                                try {
-                                    // 创建GPTService实例并调用方法
-                                    GPTService gptService = new GPTService();
-                                    String result = gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude);
+                            locationService.getCurrentLocation(new LocationService.LocationCallback() {
+                                @Override
+                                public void onLocationResult(Location location) {
+                                    double latitude = location.getLatitude();
+                                    double longitude = location.getLongitude();
 
-                                    // Log网络请求结果
-                                    Log.d("CameraFragment", result);
+                                    GPTService gptService = GPTService.getInstance();
+                                    gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude, new GPTService.GPTCallback() {
+                                        @Override
+                                        public void onSuccess(String result) {
+                                            imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
+                                                @Override
+                                                public void onSuccess() {
+                                                    Log.d("CameraFragment", "success delete image from firebase");
 
-                                    // 使用Handler回到主线程更新UI
-                                    mainHandler.post(() -> {
-                                        // 确保 resultTextView 已经初始化
-                                        Log.d("CameraFragment", result);
+                                                    Log.d("CameraFragment", result);
+                                                }
+                                                @Override
+                                                public void onFailure(Exception e) {
+                                                    Log.e("CameraFragment", "Error in delete image from firebase", e);
+                                                }
+                                            });
+                                        }
+                                        @Override
+                                        public void onFailure(String error) {
+                                            Log.e("CameraFragment", "Error in GPT request:"+error);
+                                            Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
+
+                                        }
                                     });
-                                } catch (Exception e) {
-                                    // 捕获可能的异常并记录
-                                    Log.e("CameraFragment", "Error in GPT request", e);
+                                }
+                                @Override
+                                public void onLocationError(String errorMsg) {
+
                                 }
                             });
                         }
@@ -111,4 +149,16 @@ public class CameraFragment extends Fragment {
         return cameraPreviewView;
     }
 
+    private void navigateToMapFragment() {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // 创建 RegisterFragment 实例
+        MapFragment mapFragment = new MapFragment();
+
+        // 替换当前 Fragment 并将其添加到返回栈
+        fragmentTransaction.replace(R.id.fragment_container, mapFragment);
+        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
+        fragmentTransaction.commit();
+    }
 }

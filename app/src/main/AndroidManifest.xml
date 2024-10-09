@@ -27,8 +27,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LetsTrip"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAOgJTqwR6bEZ1LKxsfcuhr5UlkEIwbV9I" />
+
         <activity
-            android:name=".TestMapActivity"
+            android:name=".LoginActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -37,9 +41,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCypkxh4Yz5DOGFBt-1w9PPJI6h7v5-lfg"/>
+        <activity android:name=".TestMapActivity" />
+        <activity android:name=".HomeActivity" />
+
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.android.fileprovider"
@@ -50,4 +55,5 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
+
 </manifest>

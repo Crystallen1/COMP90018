@@ -1,0 +1,151 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 返回按钮和标题 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/baseline_arrow_back_ios_24"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="Back"
+                    android:padding="12dp"/>
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Feedback"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="16dp"/>
+            </RelativeLayout>
+
+            <!-- Enjoyment (星级评分) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enjoyment"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"/>
+
+            <RatingBar
+                android:id="@+id/ratingBarEnjoyment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:rating="3"
+                android:layout_gravity="center"
+                android:stepSize="1"
+                android:layout_marginTop="8dp"
+                />
+
+            <!-- Tiredness Level -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiredness Level"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"/>
+
+            <RadioGroup
+                android:id="@+id/radioGroupTiredness"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"/>
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2"/>
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3"/>
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4"/>
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5"/>
+            </RadioGroup>
+
+            <!-- Favorite Attractions 下拉框 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Favorite Attractions"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerFavoriteAttractions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:spinnerMode="dropdown"
+                android:padding="12dp"
+                android:minHeight="48dp"/>
+
+            <!-- Other Feedback 文本框 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other Feedback"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"/>
+
+            <EditText
+                android:id="@+id/etOtherFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_edittext"
+                android:gravity="start|top"
+                android:padding="12dp"
+                android:hint="Enter your feedback"
+                android:inputType="textMultiLine"/>
+
+            <!-- Finish Button -->
+            <Button
+                android:id="@+id/btnFinish"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Finish"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@color/blue"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

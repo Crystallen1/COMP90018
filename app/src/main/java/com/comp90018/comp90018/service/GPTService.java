@@ -1,7 +1,17 @@
 package com.comp90018.comp90018.service;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.comp90018.comp90018.model.Journey;
+import com.comp90018.comp90018.model.TotalPlan;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import org.checkerframework.checker.lock.qual.LockHeld;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +19,14 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -19,83 +36,131 @@ import okhttp3.Response;
 public class GPTService {
     private static final String TAG = "GPTService";
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
-    String API_KEY = System.getenv("OPENAI_API_KEY");  // 从环境变量读取
+    String API_KEY ;  // 从环境变量读取
     private final OkHttpClient client = new OkHttpClient();
+    private ApiKeyService apiKeyService = new ApiKeyService();
+    private CompletableFuture<String> apiKeyFuture;
 
-    public String getJourneyIntroduction(String name, String notes) {
-        try {
-            JSONObject jsonRequest = new JSONObject();
-            jsonRequest.put("model", "gpt-3.5-turbo-0125");
-            // Build the messages array
-            JSONArray messages = new JSONArray();
-            messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));
-            messages.put(new JSONObject().put("role", "user").put("content", "Generate an introduction and travel guide for the location: " + name + ". Here are some notes: " + notes));
+    private static GPTService instance;
 
-            jsonRequest.put("messages", messages);
-            jsonRequest.put("max_tokens", 100);
-
-            RequestBody body = RequestBody.create(
-                    jsonRequest.toString(), MediaType.get("application/json; charset=utf-8"));
-
-            Request request = new Request.Builder()
-                    .url(API_URL)
-                    .post(body)
-                    .addHeader("Authorization", "Bearer " + API_KEY)
-                    .build();
-
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                // 处理 GPT 的返回结果
-                JSONObject jsonResponse = new JSONObject(response.body().string());
-                JSONArray choicesArray = jsonResponse.getJSONArray("choices");
-
-                if (choicesArray.length() > 0) {
-                    JSONObject firstChoice = choicesArray.getJSONObject(0);
-                    JSONObject messageObject = firstChoice.getJSONObject("message");
-                    if (messageObject.has("content")) {
-                        return messageObject.getString("content").trim();
-                    } else {
-                        throw new JSONException("No 'content' field in the message object");
-                    }
-                } else {
-                    throw new JSONException("Choices array is empty");
+    public static GPTService getInstance(){
+        if (instance==null){
+            synchronized (GPTService.class){
+                if(instance==null){
+                    instance=new GPTService();
                 }
             }
-        } catch (JSONException e) {
-            // 捕获 JSON 构造或解析的错误
-            Log.e(TAG, "JSON parsing/creation error: " + e.getMessage(), e);
-            return "Error generating journey introduction due to JSON error.";
-
-        } catch (SocketTimeoutException e) {
-            // 捕获网络超时异常
-            Log.e(TAG, "Network timeout: " + e.getMessage(), e);
-            return "Network timeout. Please check your connection and try again.";
-
-        } catch (UnknownHostException e) {
-            // 捕获 DNS 解析错误或网络不可达问题
-            Log.e(TAG, "Network connection error: " + e.getMessage(), e);
-            return "Network error. Unable to reach the server. Please check your connection.";
-
-        } catch (IOException e) {
-            // 捕获网络IO错误
-            Log.e(TAG, "IO error during API request: " + e.getMessage(), e);
-            return "Error generating journey introduction due to network issue.";
-
-        } catch (NullPointerException e) {
-            // 捕获潜在的空指针错误
-            Log.e(TAG, "NullPointerException: " + e.getMessage(), e);
-            return "An unexpected error occurred. Please try again.";
-
-        } catch (Exception e) {
-            // 捕获其他未知的异常
-            Log.e(TAG, "Unexpected error: " + e.getMessage(), e);
-            return "Error generating journey introduction due to an unexpected issue.";
         }
+        return instance;
     }
 
-    public String getImageBasedJourneyIntroduction(String imageUrl, double latitude, double longitude) {
-        try {
+
+    private GPTService() {
+        apiKeyFuture = new CompletableFuture<>();
+        apiKeyService.enable();
+        apiKeyService.getApiKey("GPT_API_KEY", new ApiKeyService.ApiKeyCallback() {
+            @Override
+            public void onApiKeyRetrieved(String apiKey) {
+                API_KEY = apiKey;
+                Log.d(TAG,"Get the GPT api key:"+apiKey);
+                apiKeyFuture.complete(apiKey);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG,"fail to get the gpt api key:"+e);
+                apiKeyFuture.completeExceptionally(new RuntimeException("Failed to fetch API key"));
+            }
+        });
+    }
+
+    // 定义回调接口
+    public interface GPTCallback {
+        void onSuccess(String result);
+        void onFailure(String error);
+    }
+
+    public void getJourneyIntroduction(String name, String notes, GPTCallback callback) {
+        apiKeyFuture.thenAccept(apiKey -> {
+            // 使用apiKey进行操作
+            try {
+                JSONObject jsonRequest = new JSONObject();
+                jsonRequest.put("model", "gpt-3.5-turbo-0125");
+
+                // 构建消息数组
+                JSONArray messages = new JSONArray();
+                messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));
+                messages.put(new JSONObject().put("role", "user").put("content", "Generate an introduction and travel guide for the location: " + name + ". Here are some notes: " + notes));
+
+                jsonRequest.put("messages", messages);
+                jsonRequest.put("max_tokens", 100);
+
+                RequestBody body = RequestBody.create(
+                        jsonRequest.toString(), MediaType.get("application/json; charset=utf-8"));
+                if (API_KEY==null){
+                    Log.e(TAG,"APIKEY is null");
+                }
+
+                Request request = new Request.Builder()
+                        .url(API_URL)
+                        .post(body)
+                        .addHeader("Authorization", "Bearer " + API_KEY)
+                        .build();
+
+                // 发起异步请求
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        String errorMessage = getErrorMessage(e);
+                        // 在主线程中调用回调
+                        runOnUiThread(() -> callback.onFailure(errorMessage));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            runOnUiThread(() -> callback.onFailure("Unexpected code " + response));
+                            return;
+                        }
+
+                        try {
+                            // 处理 GPT 的返回结果
+                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONArray choicesArray = jsonResponse.getJSONArray("choices");
+
+                            if (choicesArray.length() > 0) {
+                                JSONObject firstChoice = choicesArray.getJSONObject(0);
+                                JSONObject messageObject = firstChoice.getJSONObject("message");
+                                if (messageObject.has("content")) {
+                                    String result = messageObject.getString("content").trim();
+                                    // 在主线程中调用成功回调
+                                    runOnUiThread(() -> callback.onSuccess(result));
+                                } else {
+                                    runOnUiThread(() -> callback.onFailure("No 'content' field in the message object"));
+                                }
+                            } else {
+                                runOnUiThread(() -> callback.onFailure("Choices array is empty"));
+                            }
+                        } catch (JSONException e) {
+                            runOnUiThread(() -> callback.onFailure("JSON parsing error: " + e.getMessage()));
+                        }
+                    }
+                });} catch (JSONException e) {
+                // 捕获 JSON 构造或解析的错误
+                Log.e(TAG, "JSON parsing/creation error: " + e.getMessage(), e);
+                callback.onFailure("Error generating journey introduction due to JSON error.");
+            }
+        }).exceptionally(throwable -> {
+            Log.e("GPTService", throwable.getMessage());
+
+            return null;
+        });
+
+
+    }
+
+    public void getImageBasedJourneyIntroduction(String imageUrl, double latitude, double longitude,GPTCallback callback) {
+        apiKeyFuture.thenAccept(apiKey -> {
+                    try {
             JSONObject jsonRequest = new JSONObject();
             jsonRequest.put("model", "gpt-4o");
 
@@ -122,55 +187,167 @@ public class GPTService {
                     .post(body)
                     .addHeader("Authorization", "Bearer " + API_KEY)
                     .build();
-
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                // Handle GPT response
-                JSONObject jsonResponse = new JSONObject(response.body().string());
-                JSONArray choicesArray = jsonResponse.getJSONArray("choices");
-
-                if (choicesArray.length() > 0) {
-                    JSONObject firstChoice = choicesArray.getJSONObject(0);
-                    JSONObject messageObject = firstChoice.getJSONObject("message");
-                    if (messageObject.has("content")) {
-                        return messageObject.getString("content").trim();
-                    } else {
-                        throw new JSONException("No 'content' field in the message object");
-                    }
-                } else {
-                    throw new JSONException("Choices array is empty");
+            // 发起异步请求
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    String errorMessage = getErrorMessage(e);
+                    // 在主线程中调用回调
+                    runOnUiThread(() -> callback.onFailure(errorMessage));
                 }
-            }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        runOnUiThread(() -> callback.onFailure("Unexpected code " + response));
+                        return;
+                    }
+
+                    try {
+                        // 处理 GPT 的返回结果
+                        JSONObject jsonResponse = new JSONObject(response.body().string());
+                        JSONArray choicesArray = jsonResponse.getJSONArray("choices");
+
+                        if (choicesArray.length() > 0) {
+                            JSONObject firstChoice = choicesArray.getJSONObject(0);
+                            JSONObject messageObject = firstChoice.getJSONObject("message");
+                            if (messageObject.has("content")) {
+                                String result = messageObject.getString("content").trim();
+                                // 在主线程中调用成功回调
+                                runOnUiThread(() -> callback.onSuccess(result));
+                            } else {
+                                runOnUiThread(() -> callback.onFailure("No 'content' field in the message object"));
+                            }
+                        } else {
+                            runOnUiThread(() -> callback.onFailure("Choices array is empty"));
+                        }
+                    } catch (JSONException e) {
+                        runOnUiThread(() -> callback.onFailure("JSON parsing error: " + e.getMessage()));
+                    }
+                }
+            });
         } catch (JSONException e) {
-            // Handle JSON creation/parsing error
+            // 捕获 JSON 构造或解析的错误
             Log.e(TAG, "JSON parsing/creation error: " + e.getMessage(), e);
-            return "Error generating image-based journey introduction due to JSON error.";
+            callback.onFailure("Error generating journey introduction due to JSON error.");
+        }
+    }).exceptionally(throwable -> {
+            Log.e("GPTService", throwable.getMessage());
+            return null;
+        });
+    }
 
-        } catch (SocketTimeoutException e) {
-            // Handle network timeout exception
-            Log.e(TAG, "Network timeout: " + e.getMessage(), e);
+    public void getDayJourneyPlan(TotalPlan totalPlan,GPTCallback callback){
+        apiKeyFuture.thenAccept(apiKey->{
+            try {
+                JSONObject jsonRequest = new JSONObject();
+                jsonRequest.put("model", "gpt-3.5-turbo-0125");
+
+                Date startDate = totalPlan.getStartDate();
+                Map<String,Journey> targetPlaceMap = totalPlan.getTargetViewPoint();
+                String city = totalPlan.getCity();
+                String mode =totalPlan.getMode();
+                int duration = totalPlan.getDuration();
+
+                StringBuilder promptBuilder = new StringBuilder();
+                // 构建 prompt 字符串
+                promptBuilder.append("I am planning a trip to ")
+                        .append(city)
+                        .append(", starting on ")
+                        .append(startDate)
+                        .append(". The trip will last for ")
+                        .append(duration)
+                        .append(" days, and I will be traveling as ")
+                        .append(mode)
+                        .append(". I have a list of potential places to visit, each with a unique identifier. ")
+                        .append("Please recommend which places I should visit on the first day of my trip.\n\n");
+                promptBuilder.append("Here is the list of places, along with their unique identifiers:\n");
+                for (Map.Entry<String, Journey> entry : targetPlaceMap.entrySet()) {
+                    promptBuilder.append(entry.getKey()).append(": ").append(entry.getValue().getName()).append("\n");
+                }
+                promptBuilder.append("\nPlease return only the place identifiers for the places I should visit on the first day. Your response should only include the list of IDs, without additional explanations.");
+
+                // 构建消息数组
+                JSONArray messages = new JSONArray();
+                messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));
+                messages.put(new JSONObject().put("role", "user").put("content", promptBuilder.toString()));
+
+                jsonRequest.put("messages", messages);
+                jsonRequest.put("max_tokens", 100);
+
+                RequestBody body = RequestBody.create(
+                        jsonRequest.toString(), MediaType.get("application/json; charset=utf-8"));
+
+                Request request = new Request.Builder()
+                        .url(API_URL)
+                        .post(body)
+                        .addHeader("Authorization", "Bearer " + API_KEY)
+                        .build();
+
+                // 发起异步请求
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        String errorMessage = getErrorMessage(e);
+                        // 在主线程中调用回调
+                        runOnUiThread(() -> callback.onFailure(errorMessage));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            runOnUiThread(() -> callback.onFailure("Unexpected code " + response));
+                            return;
+                        }
+
+                        try {
+                            // 处理 GPT 的返回结果
+                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONArray choicesArray = jsonResponse.getJSONArray("choices");
+
+                            if (choicesArray.length() > 0) {
+                                JSONObject firstChoice = choicesArray.getJSONObject(0);
+                                JSONObject messageObject = firstChoice.getJSONObject("message");
+                                if (messageObject.has("content")) {
+                                    String result = messageObject.getString("content").trim();
+                                    // 在主线程中调用成功回调
+                                    Log.d("GPTService",result);
+                                    runOnUiThread(() -> callback.onSuccess(result));
+                                } else {
+                                    runOnUiThread(() -> callback.onFailure("No 'content' field in the message object"));
+                                }
+                            } else {
+                                runOnUiThread(() -> callback.onFailure("Choices array is empty"));
+                            }
+                        } catch (JSONException e) {
+                            runOnUiThread(() -> callback.onFailure("JSON parsing error: " + e.getMessage()));
+                        }
+                    }
+                });}catch (Exception e){
+                Log.e(TAG, "JSON parsing/creation error: " + e.getMessage(), e);
+                callback.onFailure("Error generating journey introduction due to JSON error.");
+            }
+        }).exceptionally(throwable -> {
+            Log.e("GPTService",throwable.getMessage());
+            return null;
+        });
+    }
+
+    // 根据不同的异常类型返回合适的错误信息
+    private String getErrorMessage(IOException e) {
+        if (e instanceof SocketTimeoutException) {
             return "Network timeout. Please check your connection and try again.";
-
-        } catch (UnknownHostException e) {
-            // Handle DNS or network unreachable issues
-            Log.e(TAG, "Network connection error: " + e.getMessage(), e);
+        } else if (e instanceof UnknownHostException) {
             return "Network error. Unable to reach the server. Please check your connection.";
-
-        } catch (IOException e) {
-            // Handle network IO error
-            Log.e(TAG, "IO error during API request: " + e.getMessage(), e);
-            return "Error generating image-based journey introduction due to network issue.";
-
-        } catch (NullPointerException e) {
-            // Handle potential null pointer error
-            Log.e(TAG, "NullPointerException: " + e.getMessage(), e);
-            return "An unexpected error occurred. Please try again.";
-
-        } catch (Exception e) {
-            // Handle other unknown errors
-            Log.e(TAG, "Unexpected error: " + e.getMessage(), e);
-            return "Error generating image-based journey introduction due to an unexpected issue.";
+        } else {
+            return "Error generating journey introduction due to network issue: " + e.getMessage();
         }
     }
+
+    // 切换到主线程运行代码
+    private void runOnUiThread(Runnable runnable) {
+        new Handler(Looper.getMainLooper()).post(runnable);
+    }
+
+
 }

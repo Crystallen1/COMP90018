@@ -41,6 +41,9 @@ android {
         }
     }
 }
+//repositories {
+//    mavenCentral()
+//}
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -66,4 +69,12 @@ dependencies {
     implementation ("androidx.camera:camera-extensions:1.3.4")
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-auth:21.1.0")
+    implementation("com.google.maps:google-maps-services:2.2.0")
+    implementation ("com.google.firebase:firebase-config:21.0.3")
+    implementation ("com.google.firebase:firebase-firestore:24.7.1")
+    implementation ("com.google.firebase:firebase-storage:20.2.1")
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1") // 如果使用 Kotlin，请使用 kapt 替代 annotationProcessor
+
 }

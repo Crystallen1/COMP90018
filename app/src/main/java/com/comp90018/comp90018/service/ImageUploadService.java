@@ -18,6 +18,12 @@ public class ImageUploadService {
         void onFailure(Exception e);
     }
 
+    public interface DeleteCallback {
+        void onSuccess();
+        void onFailure(Exception e);
+    }
+
+
     public void uploadImageToFirebase(File photoFile, UploadCallback callback) {
         Uri fileUri = Uri.fromFile(photoFile);
         StorageReference storageRef = storage.getReference();
@@ -40,6 +46,22 @@ public class ImageUploadService {
                 })
                 .addOnFailureListener(e -> {
                     Log.e("ImageUploadService", "Image upload failed", e);
+                    callback.onFailure(e);
+                });
+    }
+
+    public void deleteImageFromFirebase(String imageUrl, DeleteCallback callback) {
+        // Get the storage reference using the image URL
+        StorageReference imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
+
+        // Delete the file
+        imageRef.delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("ImageUploadService", "Image successfully deleted");
+                    callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ImageUploadService", "Failed to delete image", e);
                     callback.onFailure(e);
                 });
     }

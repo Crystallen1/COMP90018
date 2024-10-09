@@ -1,22 +1,19 @@
 package com.comp90018.comp90018.model;
 
-import java.util.Date;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Journey {
-    private String name;         // 地点名称
-    private String notes;        // 备注信息
-    private double latitude;     // 纬度
-    private double longitude;    // 经度
-    private Date dateTime;       // 时间日期
+import androidx.annotation.NonNull;
 
-    public Journey(String name, String notes, double latitude, double longitude, Date dateTime) {
-        this.name = name;
-        this.notes = notes;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.dateTime = dateTime;
-    }
+public class Journey implements Parcelable {
+    private String id;  // 文档 ID
+    private String imageUrl;  // 图片的 URL
+    private String name;      // 地点名称
+    private String notes;     // 备注信息
+    private double latitude;  // 纬度
+    private double longitude; // 经度
 
+    // 构造函数
     public Journey(String name, String notes, double latitude, double longitude) {
         this.name = name;
         this.notes = notes;
@@ -24,7 +21,41 @@ public class Journey {
         this.longitude = longitude;
     }
 
+    // 无参构造函数
     public Journey() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Journey journey = (Journey) o;
+
+        return id != null ? id.equals(journey.id) : journey.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+
+
+    // Getter 和 Setter
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getName() {
@@ -59,11 +90,43 @@ public class Journey {
         this.longitude = longitude;
     }
 
-    public Date getDateTime() {
-        return dateTime;
+    // Parcelable 部分
+
+    // 从 Parcel 读取数据的构造函数
+    protected Journey(Parcel in) {
+        id = in.readString();
+        imageUrl = in.readString();
+        name = in.readString();
+        notes = in.readString();
+        latitude = in.readDouble();
+        longitude = in.readDouble();
     }
 
-    public void setDateTime(Date dateTime) {
-        this.dateTime = dateTime;
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(imageUrl);
+        parcel.writeString(name);
+        parcel.writeString(notes);
+        parcel.writeDouble(latitude);
+        parcel.writeDouble(longitude);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    // CREATOR 字段，用于从 Parcel 中创建 Journey 对象
+    public static final Creator<Journey> CREATOR = new Creator<Journey>() {
+        @Override
+        public Journey createFromParcel(Parcel in) {
+            return new Journey(in);
+        }
+
+        @Override
+        public Journey[] newArray(int size) {
+            return new Journey[size];
+        }
+    };
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login_navigation"
+    app:startDestination="@+id/navigation_login">
+
+    <fragment
+        android:id="@+id/navigation_register"
+        android:name="com.comp90018.comp90018.ui.login.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register" />
+
+    <fragment
+        android:id="@+id/navigation_login"
+        android:name="com.comp90018.comp90018.ui.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/navigation_forget_password"
+        android:name="com.comp90018.comp90018.ui.login.ForgotPasswordFragment"
+        android:label="ForgetPassword"
+        tools:layout="@layout/fragment_forgetpassword" />
+
+    <action
+        android:id="@+id/action_login_to_register"
+        app:destination="@id/navigation_register" />
+    <action
+        android:id="@+id/action_register_to_login"
+        app:destination="@id/navigation_login" />
+    <action
+        android:id="@+id/action_login_to_forget_password"
+        app:destination="@id/navigation_forget_password" />
+    <action
+        android:id="@+id/action_forget_password_to_login"
+        app:destination="@id/navigation_login" />
+
+</navigation>

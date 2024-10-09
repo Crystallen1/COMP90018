@@ -1,5 +1,9 @@
 package com.comp90018.comp90018.ui.map;
 import android.app.AlertDialog;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -7,17 +11,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.model.Journey;
+import com.comp90018.comp90018.model.Navigation;
+import com.comp90018.comp90018.model.NavigationStep;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
+import com.comp90018.comp90018.service.NavigationService;
+import com.comp90018.comp90018.ui.DialogFragment.LocationInputDialogFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -25,21 +36,33 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
     private GoogleMap googleMap;
     private LocationService locationService;
     private Marker currentLocationMarker;
+    private NavigationService navigationService;
+    private MapViewModel mapViewModel;
+    private FloatingActionButton fabButton1;
+    private FloatingActionButton fabButton2;
+    private FloatingActionButton fabButton3;
+    private NavController navController;
+
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
+    GPTService gptService = GPTService.getInstance();
 
     @Nullable
     @Override
@@ -48,6 +71,8 @@ public class MapFragment extends Fragment {
         mapView = rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
 
+        mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
+        navigationService = new NavigationService();
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -63,7 +88,17 @@ public class MapFragment extends Fragment {
                 googleMap.getUiSettings().setTiltGesturesEnabled(true);  // 启用倾斜手势
 
                 Log.d("MapFragment", "Map loaded with default location");
+                // 加载并应用自定义地图样式
+                try {
+                    boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
+                            getContext(), R.raw.map_style));
 
+                    if (!success) {
+                        Log.e("MapFragment", "Failed to apply map style");
+                    }
+                } catch (Resources.NotFoundException e) {
+                    Log.e("MapFragment", "Can't find map style. Error: ", e);
+                }
                 // 开始更新位置
                 updateLocationOnMap();
                 addLocationsToMap();
@@ -79,6 +114,7 @@ public class MapFragment extends Fragment {
                         return false;  // 返回 false 以继续显示默认的 InfoWindow
                     }
                 });
+//                displayRoute("Sydney", "Melbourne");
             }
         });
 
@@ -92,6 +128,54 @@ public class MapFragment extends Fragment {
 
 
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController= androidx.navigation.Navigation.findNavController(requireView());
+        fabButton1 = view.findViewById(R.id.fab_button1);
+        fabButton2 = view.findViewById(R.id.fab_button2);
+        fabButton3 = view.findViewById(R.id.fab_button3);
+
+        fabButton1.setOnClickListener(view1 -> navController.navigate(R.id.action_map_to_camera));
+        fabButton2.setOnClickListener(v -> {
+            LocationInputDialogFragment dialog = new LocationInputDialogFragment();
+
+            // 设置数据回调监听器
+            dialog.setOnLocationSetListener((startLocation, endLocation) -> {
+                // 更新UI，显示用户输入的起点和终点
+                displayRoute(startLocation,endLocation);
+            });
+
+            // 显示对话框
+            dialog.show(getChildFragmentManager(), "LocationInputDialog");
+        });
+    }
+
+    private void displayRoute(String origin, String destination) {
+        navigationService.getDirections(origin, destination, new NavigationService.DirectionsCallback() {
+            @Override
+            public void onSuccess(Navigation routes) {
+                getActivity().runOnUiThread(() -> {
+                    PolylineOptions polylineOptions = new PolylineOptions()
+                            .color(Color.BLUE) // 设置线的颜色，例如蓝色
+                            .width(10); // 设置线的宽度，例如10像素;
+                    for (NavigationStep route : routes.getNavigationSteps()) {
+                        for (LatLng point : route.getRoutes()) {
+                            polylineOptions.add(point);
+                        }
+                    }
+                    googleMap.addPolyline(polylineOptions);
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // 处理错误
+                Log.e("MapFragment", "Failed to get directions", e);
+            }
+        });
     }
 
     private void updateLocationOnMap() {
@@ -139,55 +223,42 @@ public class MapFragment extends Fragment {
     }
     // 将位置添加到地图上
     private void addLocationsToMap() {
-        GPTService gptService = new GPTService();
-
         for (int i = 0; i < journeys.size(); i++) {
-            LatLng location = new LatLng(journeys.get(i).getLatitude(),journeys.get(i).getLongitude());
-            String name = journeys.get(i).getName();
-            String notes = journeys.get(i).getNotes();
-            new FetchJourneyInfoTask(name, notes, location).execute();
-//            String generatedInfo = gptService.getJourneyIntroduction(name, notes);
-//
-//
-//            // 添加标记
-//            Marker marker = googleMap.addMarker(new MarkerOptions()
-//                    .position(location)
-//                    .title(journeys.get(i).getName())
-//                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));  // 使用不同的颜色图标
-//
-//            // 保存 Marker 和 对应信息的映射关系
-//            markerInfoMap.put(marker, generatedInfo);
+            // 创建局部变量，防止闭包问题
+            final LatLng location = new LatLng(journeys.get(i).getLatitude(), journeys.get(i).getLongitude());
+            final String name = journeys.get(i).getName();
+            final String notes = journeys.get(i).getNotes();
+
+            if (mapViewModel.hasIntroduction(name)) {
+                // 如果 ViewModel 已经缓存了介绍，则直接使用
+                String cachedIntroduction = mapViewModel.getIntroduction(name);
+                addMarkerWithInfo(location, name, cachedIntroduction);
+            }else{
+                gptService.getJourneyIntroduction(name, notes, new GPTService.GPTCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        mapViewModel.addIntroduction(name, result);  // 缓存结果到 ViewModel
+                        addMarkerWithInfo(location, name, result);
+                        Log.d("GPTService","request gpt api success");
+                    }
+                    @Override
+                    public void onFailure(String error) {
+                        Log.e("GPTService", "Failed to generate introduction: " + error);
+                        // 或者显示一个 Toast 提示用户
+                        Toast.makeText(requireContext(), "Failed to generate introduction", Toast.LENGTH_SHORT).show();                }
+                });
+            }
         }
     }
-    private class FetchJourneyInfoTask extends AsyncTask<Void, Void, String> {
-        private String name;
-        private String notes;
-        private LatLng location;
 
-        public FetchJourneyInfoTask(String name, String notes, LatLng location) {
-            this.name = name;
-            this.notes = notes;
-            this.location = location;
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            GPTService gptService = new GPTService();
-            return gptService.getJourneyIntroduction(name, notes);
-        }
-
-        @Override
-        protected void onPostExecute(String generatedInfo) {
-            // 在地图上添加标记并显示生成的介绍
-            Marker marker = googleMap.addMarker(new MarkerOptions()
-                    .position(location)
-                    .title(name)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-            // 保存 Marker 和 生成的信息
-            markerInfoMap.put(marker, generatedInfo);
-        }
+    private void addMarkerWithInfo(LatLng location, String name, String info) {
+        Marker marker = googleMap.addMarker(new MarkerOptions()
+                .position(location)
+                .title(name)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        markerInfoMap.put(marker, info);
     }
+
     // 显示自定义的信息窗口
     private void showInfoWindow(Marker marker, String info) {
         // 创建一个自定义布局
@@ -238,4 +309,5 @@ public class MapFragment extends Fragment {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
 }
