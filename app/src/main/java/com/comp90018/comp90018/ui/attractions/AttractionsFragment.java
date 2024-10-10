@@ -248,6 +248,7 @@ public class AttractionsFragment extends Fragment {
         Map<String, Journey> journeyMap = new HashMap<>();
         int index = 1; // 用来作为Map的key值，从1开始编号
         for (Journey journey : journeys) {
+            Log.d("AttractionFragment",journey.toString());
             journeyMap.put(String.valueOf(index++), journey); // 将 int 转换为 String 作为键
         }
         return journeyMap;

@@ -1,5 +1,6 @@
 package com.comp90018.comp90018.ui.detail;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,6 +103,7 @@ public class DetailFragment extends Fragment {
      */
     private void toggleWishlist() {
         Journey journey = getArguments().getParcelable("journey");
+        Log.d("DetailFragment",journey.toString());
 
         if (isInWishlist(journey)) {
             // 如果已经在愿望清单中，移除

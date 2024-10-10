@@ -11,6 +11,18 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <!-- 顶部的日期显示 -->
+    <TextView
+        android:id="@+id/textView_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:padding="16dp"
+        android:text="Date: 2024-10-09"
+    android:textSize="18sp"
+    android:textColor="@android:color/white"
+    android:background="@android:color/transparent"
+    android:gravity="center"/>
 
     <!-- 悬浮按钮的容器 -->
     <LinearLayout

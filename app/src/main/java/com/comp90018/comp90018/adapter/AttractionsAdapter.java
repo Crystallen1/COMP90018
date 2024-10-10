@@ -4,6 +4,7 @@ package com.comp90018.comp90018.adapter;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,7 @@ public class AttractionsAdapter extends RecyclerView.Adapter<AttractionsAdapter.
     public void onBindViewHolder(AttractionViewHolder holder, int position) {
         // Get the current Journey object
         Journey journey = journeyList.get(position);
+        Log.d("AttractionAdapter",journey.toString());
 
         // Set the attraction name and notes
         holder.textViewName.setText(journey.getName());
