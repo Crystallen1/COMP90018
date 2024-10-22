@@ -1,6 +1,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -11,34 +12,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <!-- 返回按钮和标题 -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageButton
-                    android:id="@+id/btnBack"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/baseline_arrow_back_ios_24"
-                    android:background="?attr/selectableItemBackground"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginStart="16dp"
-                    android:contentDescription="Back"
-                    android:padding="12dp"/>
-
-                <TextView
-                    android:id="@+id/tvTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Feedback"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="16dp"/>
-            </RelativeLayout>
 
             <!-- Enjoyment (星级评分) -->
             <TextView
@@ -56,8 +29,7 @@
                 android:rating="3"
                 android:layout_gravity="center"
                 android:stepSize="1"
-                android:layout_marginTop="8dp"
-                />
+                android:layout_marginTop="8dp"/>
 
             <!-- Tiredness Level -->
             <TextView
@@ -101,24 +73,21 @@
                     android:text="5"/>
             </RadioGroup>
 
-            <!-- Favorite Attractions 下拉框 -->
+            <!-- 実際に行ったアトラクションを選択するチェックボックス -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Favorite Attractions"
+                android:text="Select Attractions You Did"
                 android:textSize="18sp"
                 android:layout_marginTop="24dp"/>
 
-            <Spinner
-                android:id="@+id/spinnerFavoriteAttractions"
+            <LinearLayout
+                android:id="@+id/attractionContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:spinnerMode="dropdown"
-                android:padding="12dp"
-                android:minHeight="48dp"/>
+                android:orientation="vertical" />
 
-            <!-- Other Feedback 文本框 -->
+            <!-- Other Feedback -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -142,7 +111,7 @@
                 android:id="@+id/btnFinish"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Finish"
+                android:text="Send feedback"
                 android:layout_marginTop="24dp"
                 android:backgroundTint="@color/blue"
                 android:textColor="@android:color/white"/>
