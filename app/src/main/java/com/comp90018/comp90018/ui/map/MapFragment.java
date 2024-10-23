@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -374,7 +375,9 @@ public class MapFragment extends Fragment {
 
         // Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter("com.comp90018.STEP_COUNT_UPDATED");
-        requireContext().registerReceiver(stepCountReceiver, filter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            requireContext().registerReceiver(stepCountReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        }
 
         updateLocationOnMap(); // 启动位置更新
     }
