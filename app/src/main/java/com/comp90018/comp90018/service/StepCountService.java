@@ -17,6 +17,13 @@ public class StepCountService extends Service implements SensorEventListener {
 
     private SensorManager sensorManager;
 
+    private void sendStepCountBroadcast(int stepCount) {
+        Intent intent = new Intent("com.comp90018.STEP_COUNT_UPDATED");
+        intent.putExtra("stepCount", stepCount);
+        sendBroadcast(intent);
+    }
+
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -42,6 +49,8 @@ public class StepCountService extends Service implements SensorEventListener {
             Log.d("StepCountService", "Steps: " + stepCount);
 
             // 保存步数到 SharedPreferences 中
+            sendStepCountBroadcast(stepCount);
+
             SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt(STEP_COUNT_KEY, stepCount);

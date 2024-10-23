@@ -1,5 +1,9 @@
 package com.comp90018.comp90018.ui.map;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -33,6 +37,7 @@ import com.comp90018.comp90018.service.FirebaseService;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
 import com.comp90018.comp90018.service.NavigationService;
+import com.comp90018.comp90018.service.StepCountService;
 import com.comp90018.comp90018.ui.DialogFragment.LocationInputDialogFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -71,12 +76,24 @@ public class MapFragment extends Fragment {
     private FloatingActionButton fabButton3;
     private NavController navController;
     private TextView textView;
+    private TextView stepCountTextView;
     private CompletableFuture<String> firebaseFuture;
 
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
     GPTService gptService = GPTService.getInstance();
+
+    private BroadcastReceiver stepCountReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.comp90018.STEP_COUNT_UPDATED")) {
+                int stepCount = intent.getIntExtra("stepCount", 0);
+                // Update the TextView with the step count
+                stepCountTextView.setText("Steps: " + stepCount);
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -119,7 +136,16 @@ public class MapFragment extends Fragment {
                     Log.w("PlanService", "Error getting documents", e);
                     firebaseFuture.completeExceptionally(new RuntimeException("fail to get info from firebase"));
                 });
+        textView = rootView.findViewById(R.id.textView_date);
+        stepCountTextView = rootView.findViewById(R.id.textView_step_count);
 
+        // 获取当前设备时间
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String currentDate = dateFormat.format(calendar.getTime());
+
+        // 设置TextView的文本为当前日期时间
+        textView.setText(currentDate);
 
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
@@ -181,20 +207,15 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Start the step count service
+        Intent intent = new Intent(requireContext(), StepCountService.class);
+        requireContext().startService(intent);
+
         navController= androidx.navigation.Navigation.findNavController(requireView());
 
         fabButton1 = view.findViewById(R.id.fab_button1);
         fabButton2 = view.findViewById(R.id.fab_button2);
         fabButton3 = view.findViewById(R.id.fab_button3);
-        textView = view.findViewById(R.id.textView_date);
-
-        // 获取当前设备时间
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String currentDate = dateFormat.format(calendar.getTime());
-
-        // 设置TextView的文本为当前日期时间
-        textView.setText(currentDate);
 
         fabButton1.setOnClickListener(view1 -> navController.navigate(R.id.action_map_to_camera));
         fabButton2.setOnClickListener(v -> {
@@ -350,6 +371,11 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.onResume();
+
+        // Register the BroadcastReceiver
+        IntentFilter filter = new IntentFilter("com.comp90018.STEP_COUNT_UPDATED");
+        requireContext().registerReceiver(stepCountReceiver, filter);
+
         updateLocationOnMap(); // 启动位置更新
     }
 
@@ -357,6 +383,9 @@ public class MapFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mapView.onPause();
+
+        requireContext().unregisterReceiver(stepCountReceiver);
+
         locationService.stopLocationUpdates(); // 停止位置更新
     }
 
