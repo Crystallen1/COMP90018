@@ -12,6 +12,7 @@
     <uses-feature android:name="android.hardware.sensor.temperature" android:required="false" />
     <uses-feature android:name="android.hardware.sensor.humidity" android:required="false" />
     <uses-feature android:name="android.hardware.sensor.barometer" android:required="false" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -47,6 +48,11 @@
         </activity>
         <activity android:name=".TestMapActivity" />
         <activity android:name=".HomeActivity" />
+        <service
+        android:name=".service.StepCountService"
+        android:enabled="true"
+        android:exported="false" />
+
 
 
         <provider
