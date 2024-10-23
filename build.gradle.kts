@@ -11,6 +11,6 @@ tasks.register<Delete>("clean") {
 }
 buildscript {
     dependencies {
-        classpath("com.android.tools.build:gradle:8.5.1")  // 升级到 8.x 或更高版本
+        classpath("com.android.tools.build:gradle:8.5.2")  // 升级到 8.x 或更高版本
     }
 }

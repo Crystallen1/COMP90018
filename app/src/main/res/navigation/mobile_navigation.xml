@@ -57,6 +57,16 @@
         android:label="Feedback"
         tools:layout="@layout/fragment_feedback" />
 
+    <fragment
+        android:id="@+id/weatherFragment"
+        android:name="com.comp90018.comp90018.ui.weather.WeatherFragment"
+        android:label="Weather Sensor"
+        tools:layout="@layout/fragment_weather" />
+
+    <action
+        android:id="@+id/action_homeFragment_to_weatherFragment"
+        app:destination="@id/weatherFragment" />
+
     <action
         android:id="@+id/action_home_to_map"
         app:destination="@id/navigation_map" />
