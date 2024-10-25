@@ -11,6 +11,9 @@ public class PermissionManager {
     private static final int CAMERA_PERMISSION_CODE = 200;
     private static final int STORAGE_PERMISSION_CODE = 201;
     private static final int LOCATION_PERMISSION_CODE = 202;
+    private static final int ACTIVITY_RECOGNITION_PERMISSION_CODE = 203;
+    private static final int BODY_SENSORS_PERMISSION_CODE = 204;
+
 
     // 构造函数，传入 Activity 实例
     public PermissionManager(Activity activity) {
@@ -45,6 +48,16 @@ public class PermissionManager {
     // 请求位置权限
     public void requestLocationPermission() {
         ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+    }
+
+    // 检查 Activity Recognition 权限
+    public boolean hasActivityRecognitionPermission() {
+        return ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // 请求 Activity Recognition 权限
+    public void requestActivityRecognitionPermission() {
+        ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.ACTIVITY_RECOGNITION}, ACTIVITY_RECOGNITION_PERMISSION_CODE);
     }
 
     // 判断某个权限是否被授予
