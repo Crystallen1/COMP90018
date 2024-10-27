@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- 右上角的删除按钮 -->
         <ImageView
             android:id="@+id/ivDelete"
             android:layout_width="48dp"
@@ -33,7 +32,6 @@
             android:layout_toStartOf="@id/ivDelete"
             android:paddingEnd="32dp">
 
-            <!-- 时间 -->
             <TextView
                 android:id="@+id/tvTime"
                 android:layout_width="wrap_content"
@@ -42,18 +40,16 @@
                 android:text="2024-8-10"
                 android:textColor="@color/black"/>
 
-            <!-- 计划标题 -->
             <TextView
                 android:id="@+id/tvLocationTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Peter coffe"
+                android:text="Peter Coffee"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_marginTop="8dp"/>
 
-            <!-- 描述 -->
             <TextView
                 android:id="@+id/tvDescription"
                 android:layout_width="wrap_content"
@@ -63,7 +59,6 @@
                 android:textColor="@color/gray"
                 android:layout_marginTop="4dp"/>
 
-            <!-- 地图链接 -->
             <TextView
                 android:id="@+id/tvViewInMap"
                 android:layout_width="wrap_content"
@@ -73,7 +68,13 @@
                 android:drawablePadding="8dp"
                 android:textColor="@color/blue"
                 android:layout_marginTop="8dp"/>
+
+            <Button
+                android:id="@+id/endTripButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="End Trip"
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
     </RelativeLayout>
-
 </com.google.android.material.card.MaterialCardView>
