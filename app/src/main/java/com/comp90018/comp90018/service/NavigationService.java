@@ -1,5 +1,9 @@
 package com.comp90018.comp90018.service;
 
+import static android.app.PendingIntent.getActivity;
+
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -88,6 +92,56 @@ public class NavigationService {
         }).exceptionally(throwable -> {
             Log.e("GPTService", throwable.getMessage());
             return null;
+        });
+    }
+
+    public void getSuggestions(String input, Context context, PlacesCallback callback) {
+        apiKeyFuture.thenAccept(apiKey -> {
+            OkHttpClient client = new OkHttpClient();
+            HttpUrl.Builder urlBuilder = HttpUrl.parse("https://maps.googleapis.com/maps/api/place/autocomplete/json").newBuilder();
+
+            urlBuilder.addQueryParameter("input", input);
+            urlBuilder.addQueryParameter("key", apiKey); // Use the correct API key for Places API
+
+            String url = urlBuilder.build().toString();
+            Request request = new Request.Builder().url(url).build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e(TAG, "Request Failed", e);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String responseData = response.body().string();
+
+                        List<String> suggestions = new ArrayList<>();
+                        try {
+                            JSONObject jsonObject = new JSONObject(responseData);
+                            JSONArray predictionsArray = jsonObject.getJSONArray("predictions");
+
+                            for (int i = 0; i < predictionsArray.length(); i++) {
+                                JSONObject prediction = predictionsArray.getJSONObject(i);
+                                String description = prediction.getString("description");
+                                suggestions.add(description);
+                            }
+                        } catch (JSONException e) {
+                            Log.e(TAG, "JSON Parsing error: " + e.getMessage());
+                        }
+
+                        // 使用 Context 切换到主线程
+                        if (context instanceof Activity) {
+                            ((Activity) context).runOnUiThread(() -> {
+                                callback.onSuggestionsRetrieved(suggestions);
+                            });
+                        }
+                    } else {
+                        Log.e(TAG, "Error: " + response.message());
+                    }
+                }
+            });
         });
     }
 
@@ -243,5 +297,9 @@ public class NavigationService {
     public interface DirectionsCallback {
         void onSuccess(Navigation routes);
         void onFailure(Exception e);
+    }
+
+    public interface PlacesCallback {
+        void onSuggestionsRetrieved(List<String> suggestions);
     }
 }
