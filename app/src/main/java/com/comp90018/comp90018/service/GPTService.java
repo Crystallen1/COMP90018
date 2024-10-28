@@ -21,7 +21,9 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -89,10 +91,10 @@ public class GPTService {
                 // 构建消息数组
                 JSONArray messages = new JSONArray();
                 messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));
-                messages.put(new JSONObject().put("role", "user").put("content", "Generate an introduction and travel guide for the location: " + name + ". Here are some notes: " + notes));
+                messages.put(new JSONObject().put("role", "user").put("content", "Now I want to visit " + name + ". Could you give me some introductions and travel recommendations? I mainly want to know some information about its history and ticket." + notes));
 
                 jsonRequest.put("messages", messages);
-                jsonRequest.put("max_tokens", 100);
+//                jsonRequest.put("max_tokens", 100);
 
                 RequestBody body = RequestBody.create(
                         jsonRequest.toString(), MediaType.get("application/json; charset=utf-8"));
@@ -126,6 +128,7 @@ public class GPTService {
                             // 处理 GPT 的返回结果
                             JSONObject jsonResponse = new JSONObject(response.body().string());
                             JSONArray choicesArray = jsonResponse.getJSONArray("choices");
+
 
                             if (choicesArray.length() > 0) {
                                 JSONObject firstChoice = choicesArray.getJSONObject(0);
@@ -170,14 +173,14 @@ public class GPTService {
 
 // 构建 content 数组，包含文本和图片 URL
             JSONArray contentArray = new JSONArray();
-            contentArray.put(new JSONObject().put("type", "text").put("text", "Provide an introduction and travel guide for the location based on this image and the latitude: "
-                    + latitude + " and longitude: " + longitude + "."));
+            contentArray.put(new JSONObject().put("type", "text").put("text", "This is a photo I took right now, and my position is  "
+                    + latitude + " and longitude: " + longitude + "."+" Could you give me an introduction to the attraction in my photo and some travel tips for it?"));
             contentArray.put(new JSONObject().put("type", "image_url").put("image_url", new JSONObject().put("url", imageUrl)));
 
 // 添加到 user 的 message
             messages.put(new JSONObject().put("role", "user").put("content", contentArray));
             jsonRequest.put("messages", messages);
-            jsonRequest.put("max_tokens", 100);
+//            jsonRequest.put("max_tokens", 100);
 
             RequestBody body = RequestBody.create(
                     jsonRequest.toString(), MediaType.get("application/json; charset=utf-8"));
