@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.firebase.storage)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -75,6 +76,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore:24.7.1")
     implementation ("com.google.firebase:firebase-storage:20.2.1")
     implementation ("com.github.bumptech.glide:glide:4.15.1")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1") // 如果使用 Kotlin，请使用 kapt 替代 annotationProcessor
 
 }

@@ -32,6 +32,37 @@ public class TotalPlan implements Parcelable {
         this.targetViewPoint = targetViewPoint;
     }
 
+    public String toString() {
+        return "TotalPlan{" +
+                "dayPlans=" + dayPlansToString() +
+                ", targetViewPoint=" + targetViewPointToString() +
+                ", startDate=" + (startDate != null ? startDate.toString() : "N/A") +
+                ", endDate=" + (endDate != null ? endDate.toString() : "N/A") +
+                ", duration=" + duration +
+                ", city='" + (city != null ? city : "N/A") + '\'' +
+                ", name='" + (name != null ? name : "N/A") + '\'' +
+                ", mode='" + (mode != null ? mode : "N/A") + '\'' +
+                '}';
+    }
+
+    // 辅助方法：将 dayPlans 列表转换为字符串
+    private String dayPlansToString() {
+        StringBuilder sb = new StringBuilder("[");
+        for (DayPlan dayPlan : dayPlans) {
+            sb.append(dayPlan.toString()).append(", ");
+        }
+        return sb.length() > 1 ? sb.substring(0, sb.length() - 2) + "]" : "[]";
+    }
+
+    // 辅助方法：将 targetViewPoint Map 转换为字符串
+    private String targetViewPointToString() {
+        StringBuilder sb = new StringBuilder("{");
+        for (Map.Entry<String, Journey> entry : targetViewPoint.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue().toString()).append(", ");
+        }
+        return sb.length() > 1 ? sb.substring(0, sb.length() - 2) + "}" : "{}";
+    }
+
     public String getMode() {
         return mode;
     }
