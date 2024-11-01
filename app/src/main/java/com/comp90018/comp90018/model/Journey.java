@@ -10,15 +10,29 @@ public class Journey implements Parcelable {
     private String imageUrl;  // 图片的 URL
     private String name;      // 地点名称
     private String notes;     // 备注信息
-    private double latitude;  // 纬度
-    private double longitude; // 经度
+    private double Latitude;  // 纬度
+    private double Longitude; // 经度
+    private boolean isFinished;
+
+    @Override
+    public String toString() {
+        return "Journey{" +
+                "id='" + id + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", name='" + name + '\'' +
+                ", notes='" + notes + '\'' +
+                ", latitude=" + Latitude +
+                ", longitude=" + Longitude +
+                '}';
+    }
 
     // 构造函数
     public Journey(String name, String notes, double latitude, double longitude) {
         this.name = name;
         this.notes = notes;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.Latitude = latitude;
+        this.Longitude = longitude;
+        this.isFinished = false;
     }
 
     // 无参构造函数
@@ -75,19 +89,27 @@ public class Journey implements Parcelable {
     }
 
     public double getLatitude() {
-        return latitude;
+        return Latitude;
     }
 
     public void setLatitude(double latitude) {
-        this.latitude = latitude;
+        this.Latitude = latitude;
     }
 
     public double getLongitude() {
-        return longitude;
+        return Longitude;
     }
 
     public void setLongitude(double longitude) {
-        this.longitude = longitude;
+        this.Longitude = longitude;
+    }
+
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void setFinished(boolean finished) {
+        isFinished = finished;
     }
 
     // Parcelable 部分
@@ -98,8 +120,9 @@ public class Journey implements Parcelable {
         imageUrl = in.readString();
         name = in.readString();
         notes = in.readString();
-        latitude = in.readDouble();
-        longitude = in.readDouble();
+        Latitude = in.readDouble();
+        Longitude = in.readDouble();
+        isFinished = in.readByte() != 0;
     }
 
     @Override
@@ -108,8 +131,9 @@ public class Journey implements Parcelable {
         parcel.writeString(imageUrl);
         parcel.writeString(name);
         parcel.writeString(notes);
-        parcel.writeDouble(latitude);
-        parcel.writeDouble(longitude);
+        parcel.writeDouble(Latitude);
+        parcel.writeDouble(Longitude);
+        parcel.writeByte((byte) (isFinished ? 1 : 0));
     }
 
     @Override

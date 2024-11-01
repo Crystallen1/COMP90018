@@ -188,6 +188,7 @@ public class ViewpointService {
 
                                 // 获取文档中的数据
                                 Journey journeyData = document.toObject(Journey.class);
+                                Log.d(TAG,journeyData.toString());
                                 journeyData.setId(documentId);
 
                                 // 从 Storage 获取图片

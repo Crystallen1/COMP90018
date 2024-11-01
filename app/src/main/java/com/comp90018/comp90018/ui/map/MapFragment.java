@@ -1,11 +1,16 @@
 package com.comp90018.comp90018.ui.map;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,14 +25,20 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.comp90018.comp90018.R;
+import com.comp90018.comp90018.adapter.TripAdapter;
+import com.comp90018.comp90018.model.DayPlan;
 import com.comp90018.comp90018.model.Journey;
 import com.comp90018.comp90018.model.Navigation;
 import com.comp90018.comp90018.model.NavigationStep;
+import com.comp90018.comp90018.model.TotalPlan;
+import com.comp90018.comp90018.service.FirebaseService;
 import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.LocationService;
 import com.comp90018.comp90018.service.NavigationService;
+import com.comp90018.comp90018.service.StepCountService;
 import com.comp90018.comp90018.ui.DialogFragment.LocationInputDialogFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,12 +51,20 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
@@ -58,11 +77,26 @@ public class MapFragment extends Fragment {
     private FloatingActionButton fabButton2;
     private FloatingActionButton fabButton3;
     private NavController navController;
+    private TextView textView;
+    private TextView stepCountTextView;
+    private CompletableFuture<String> firebaseFuture;
+    private Polyline currentPolyline;
 
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
     private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
     GPTService gptService = GPTService.getInstance();
+
+    private BroadcastReceiver stepCountReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.comp90018.STEP_COUNT_UPDATED")) {
+                int stepCount = intent.getIntExtra("stepCount", 0);
+                // Update the TextView with the step count
+                stepCountTextView.setText("Steps: " + stepCount);
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -73,6 +107,49 @@ public class MapFragment extends Fragment {
 
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         navigationService = new NavigationService();
+
+        firebaseFuture = new CompletableFuture<>();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // 当前用户ID
+        FirebaseService.getInstance().getAllTotalPlans(userId,
+                totalPlans -> {
+                    // 存储唯一的 Journey 对象
+                    Set<Journey> journeySet = new HashSet<>();
+
+                    // 获取当前日期
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String today = dateFormat.format(Calendar.getInstance().getTime());
+                    Log.d("MapFragment", String.valueOf(totalPlans.size()));
+                    // 遍历所有的 TotalPlan
+                    for (TotalPlan totalPlan : totalPlans) {
+                        // 遍历 TotalPlan 中的所有 DayPlan
+                        for (DayPlan dayPlan : totalPlan.getDayPlans()) {
+                            // 检查 DayPlan 的日期是否为今天
+                            if (dayPlan.getDate() != null && dateFormat.format(dayPlan.getDate()).equals(today)) {
+                                // 将今天的 Journey 加入 Set 来去除重复
+                                journeySet.addAll(dayPlan.getJourneys());
+                            }
+                        }
+                    }
+                    Log.d("MapFragment",String.valueOf(journeySet.size()));
+                    journeys.addAll(journeySet);
+                    journeys.add(new Journey("Flinders station","I hope play around this station about 2 hours",-37.8136, 144.9631)); // 墨尔本
+                    firebaseFuture.complete("success");
+                },
+                e -> {
+                    Log.w("PlanService", "Error getting documents", e);
+                    firebaseFuture.completeExceptionally(new RuntimeException("fail to get info from firebase"));
+                });
+        textView = rootView.findViewById(R.id.textView_date);
+        stepCountTextView = rootView.findViewById(R.id.textView_step_count);
+
+        // 获取当前设备时间
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String currentDate = dateFormat.format(calendar.getTime());
+
+        // 设置TextView的文本为当前日期时间
+        textView.setText(currentDate);
+
         // 初始化Google地图
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -101,7 +178,12 @@ public class MapFragment extends Fragment {
                 }
                 // 开始更新位置
                 updateLocationOnMap();
-                addLocationsToMap();
+                firebaseFuture.thenAccept(result->{
+                    addLocationsToMap();
+                }).exceptionally(throwable -> {
+                    Log.e("MapFragment", throwable.getMessage());
+                    return null;
+                });
                 // 设置点击 Marker 弹出信息窗口
                 googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
@@ -121,11 +203,6 @@ public class MapFragment extends Fragment {
         // 初始化位置服务
         locationService = new LocationService(requireContext());
         Log.d("MapFragment", "LocationService initialized");
-        // 添加一些示例位置和信息
-        journeys.add(new Journey("Flinders station","I hope play around this station about 2 hours",-37.8136, 144.9631)); // 墨尔本
-
-//        journeys.add(new Journey("place2","这是阿德莱德的位置，更多详细信息可以在这里显示...",-37.8285, 144.9641)); // 墨尔本
-
 
         return rootView;
     }
@@ -133,7 +210,12 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Start the step count service
+        Intent intent = new Intent(requireContext(), StepCountService.class);
+        requireContext().startService(intent);
+
         navController= androidx.navigation.Navigation.findNavController(requireView());
+
         fabButton1 = view.findViewById(R.id.fab_button1);
         fabButton2 = view.findViewById(R.id.fab_button2);
         fabButton3 = view.findViewById(R.id.fab_button3);
@@ -154,6 +236,11 @@ public class MapFragment extends Fragment {
     }
 
     private void displayRoute(String origin, String destination) {
+        // 清除上一次的路线
+        if (currentPolyline != null) {
+            currentPolyline.remove();
+        }
+
         navigationService.getDirections(origin, destination, new NavigationService.DirectionsCallback() {
             @Override
             public void onSuccess(Navigation routes) {
@@ -166,7 +253,7 @@ public class MapFragment extends Fragment {
                             polylineOptions.add(point);
                         }
                     }
-                    googleMap.addPolyline(polylineOptions);
+                    currentPolyline = googleMap.addPolyline(polylineOptions);
                 });
             }
 
@@ -223,11 +310,15 @@ public class MapFragment extends Fragment {
     }
     // 将位置添加到地图上
     private void addLocationsToMap() {
+        Log.d("MapFragment", String.valueOf(journeys.size()));
         for (int i = 0; i < journeys.size(); i++) {
             // 创建局部变量，防止闭包问题
             final LatLng location = new LatLng(journeys.get(i).getLatitude(), journeys.get(i).getLongitude());
             final String name = journeys.get(i).getName();
             final String notes = journeys.get(i).getNotes();
+            Log.d("MapFragment","Latitude"+journeys.get(i).getLatitude()+"Longitude"+journeys.get(i).getLongitude());
+            Log.d("MapFragment","name"+journeys.get(i).getName());
+            Log.d("MapFragment","notes"+journeys.get(i).getNotes());
 
             if (mapViewModel.hasIntroduction(name)) {
                 // 如果 ViewModel 已经缓存了介绍，则直接使用
@@ -284,10 +375,24 @@ public class MapFragment extends Fragment {
         dialog.show();
     }
 
+    public void clearRoute() {
+        if (currentPolyline != null) {
+            currentPolyline.remove();
+            currentPolyline = null;
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         mapView.onResume();
+
+        // Register the BroadcastReceiver
+        IntentFilter filter = new IntentFilter("com.comp90018.STEP_COUNT_UPDATED");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            requireContext().registerReceiver(stepCountReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        }
+
         updateLocationOnMap(); // 启动位置更新
     }
 
@@ -295,6 +400,9 @@ public class MapFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mapView.onPause();
+
+        requireContext().unregisterReceiver(stepCountReceiver);
+
         locationService.stopLocationUpdates(); // 停止位置更新
     }
 
