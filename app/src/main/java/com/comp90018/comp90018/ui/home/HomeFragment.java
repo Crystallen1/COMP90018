@@ -80,6 +80,7 @@ public class HomeFragment extends Fragment {
             public void onClick(View view) {
                 Toast.makeText(getContext(), "View All Clicked", Toast.LENGTH_SHORT).show();
                 // TODO: 实现导航到 ViewAllTripsFragment 或类似页面
+                loadFullPlan();
                 // 例如：
 //                Navigation.findNavController(view).navigate(R.id.fragment_create_trip);
             }
@@ -90,6 +91,34 @@ public class HomeFragment extends Fragment {
      * 设置 RecyclerView
      */
     private void setupRecyclerView() {
+        // 初始化旅行列表
+        tripList = new ArrayList<>();
+
+// 获取数据并设置适配器
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // 当前用户ID
+        FirebaseService.getInstance().getOngoingPlans(userId,
+                totalPlans -> {
+                    // 将获取到的 totalPlans 传递给适配器
+                    tripAdapter = new TripAdapter(getContext(), totalPlans, new TripAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(TotalPlan totalPlan) {
+                            // 处理点击事件
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable("totalPlan", totalPlan);
+                            Navigation.findNavController(getView()).navigate(R.id.action_home_to_plan, bundle);
+                        }
+                    }, navController);
+
+                    // 设置布局管理器和适配器
+                    recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
+                    recyclerViewTrips.setAdapter(tripAdapter);
+                },
+                e -> {
+                    Log.w("PlanService", "Error getting documents", e);
+                });
+    }
+
+    private void loadFullPlan() {
         // 初始化旅行列表
         tripList = new ArrayList<>();
 

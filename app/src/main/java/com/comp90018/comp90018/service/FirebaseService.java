@@ -74,6 +74,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class FirebaseService {
@@ -181,6 +182,44 @@ public class FirebaseService {
                                     }
                                 }
                                 totalPlans.add(totalPlan);
+                                System.out.println("Fetched TotalPlan: " + totalPlan);
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error parsing TotalPlan: " + e.getMessage());
+                        }
+                    }
+
+                    System.out.println("Total plans fetched: " + totalPlans.size());
+                    onSuccess.onSuccess(totalPlans);
+                })
+                .addOnFailureListener(e -> {
+                    System.err.println("Error fetching TotalPlans: " + e.getMessage());
+                    onFailure.onFailure(e);
+                });
+    }
+
+    public void getOngoingPlans(String userId,
+                                 OnSuccessListener<List<TotalPlan>> onSuccess,
+                                 OnFailureListener onFailure) {
+
+        db.collection("users").document(userId).collection("userPlans")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<TotalPlan> totalPlans = new ArrayList<>();
+                    for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                        try {
+                            // 确保 DayPlan 和 Journey 被正确解析
+                            TotalPlan totalPlan = document.toObject(TotalPlan.class);
+
+                            if (totalPlan != null) {
+                                for (DayPlan dayPlan : totalPlan.getDayPlans()) {
+                                    if (dayPlan.getJourneys() == null) {
+                                        dayPlan.setJourneys(new ArrayList<>());
+                                    }
+                                }
+                                if (totalPlan.getEndDate().compareTo(new Date())>=0){
+                                    totalPlans.add(totalPlan);
+                                }
                                 System.out.println("Fetched TotalPlan: " + totalPlan);
                             }
                         } catch (Exception e) {
