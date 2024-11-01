@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -79,6 +80,7 @@ public class MapFragment extends Fragment {
     private TextView textView;
     private TextView stepCountTextView;
     private CompletableFuture<String> firebaseFuture;
+    private Polyline currentPolyline;
 
 
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
@@ -234,6 +236,11 @@ public class MapFragment extends Fragment {
     }
 
     private void displayRoute(String origin, String destination) {
+        // 清除上一次的路线
+        if (currentPolyline != null) {
+            currentPolyline.remove();
+        }
+
         navigationService.getDirections(origin, destination, new NavigationService.DirectionsCallback() {
             @Override
             public void onSuccess(Navigation routes) {
@@ -246,7 +253,7 @@ public class MapFragment extends Fragment {
                             polylineOptions.add(point);
                         }
                     }
-                    googleMap.addPolyline(polylineOptions);
+                    currentPolyline = googleMap.addPolyline(polylineOptions);
                 });
             }
 
@@ -366,6 +373,13 @@ public class MapFragment extends Fragment {
         // 显示对话框
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void clearRoute() {
+        if (currentPolyline != null) {
+            currentPolyline.remove();
+            currentPolyline = null;
+        }
     }
 
     @Override

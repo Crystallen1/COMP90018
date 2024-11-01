@@ -293,6 +293,78 @@ public class NavigationService {
 
         return null;
     }
+    public void getDirections(String originName, double destLat, double destLng, DirectionsCallback callback) {
+        geocodeLocation(originName, new GeocodingCallback() {
+            @Override
+            public void onSuccess(LatLng originLatLng) {
+                // 使用解析后的起点经纬度和指定的终点经纬度调用现有的 getDirections 方法
+                getDirections(originLatLng.latitude, originLatLng.longitude, destLat, destLng, callback);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+    public void geocodeLocation(String locationName, GeocodingCallback callback) {
+        apiKeyFuture.thenAccept(apiKey -> {
+            OkHttpClient client = new OkHttpClient();
+            HttpUrl.Builder urlBuilder = HttpUrl.parse("https://maps.googleapis.com/maps/api/geocode/json").newBuilder();
+            urlBuilder.addQueryParameter("address", locationName);
+            urlBuilder.addQueryParameter("key", apiKey);
+
+            String url = urlBuilder.build().toString();
+            Request request = new Request.Builder().url(url).build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    callback.onFailure(e);
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        String jsonResponse = response.body().string();
+                        LatLng location = parseGeocodingResponse(jsonResponse);
+                        if (location != null) {
+                            callback.onSuccess(location);
+                        } else {
+                            callback.onFailure(new IOException("Failed to parse location"));
+                        }
+                    } else {
+                        callback.onFailure(new IOException("Unexpected code " + response));
+                    }
+                }
+            });
+        }).exceptionally(throwable -> {
+            Log.e("GeocodingService", throwable.getMessage());
+            return null;
+        });
+    }
+    private LatLng parseGeocodingResponse(String jsonResponse) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONArray results = jsonObject.getJSONArray("results");
+            if (results.length() > 0) {
+                JSONObject location = results.getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+                double lat = location.getDouble("lat");
+                double lng = location.getDouble("lng");
+                return new LatLng(lat, lng);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Geocoding 回调接口
+    public interface GeocodingCallback {
+        void onSuccess(LatLng location);
+        void onFailure(Exception e);
+    }
+
 
     public interface DirectionsCallback {
         void onSuccess(Navigation routes);
