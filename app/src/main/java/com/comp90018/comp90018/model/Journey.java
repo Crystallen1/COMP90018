@@ -12,6 +12,7 @@ public class Journey implements Parcelable {
     private String notes;     // 备注信息
     private double Latitude;  // 纬度
     private double Longitude; // 经度
+    private boolean isFinished;
 
     @Override
     public String toString() {
@@ -31,6 +32,7 @@ public class Journey implements Parcelable {
         this.notes = notes;
         this.Latitude = latitude;
         this.Longitude = longitude;
+        this.isFinished = false;
     }
 
     // 无参构造函数
@@ -102,6 +104,14 @@ public class Journey implements Parcelable {
         this.Longitude = longitude;
     }
 
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void setFinished(boolean finished) {
+        isFinished = finished;
+    }
+
     // Parcelable 部分
 
     // 从 Parcel 读取数据的构造函数
@@ -112,6 +122,7 @@ public class Journey implements Parcelable {
         notes = in.readString();
         Latitude = in.readDouble();
         Longitude = in.readDouble();
+        isFinished = in.readByte() != 0;
     }
 
     @Override
@@ -122,6 +133,7 @@ public class Journey implements Parcelable {
         parcel.writeString(notes);
         parcel.writeDouble(Latitude);
         parcel.writeDouble(Longitude);
+        parcel.writeByte((byte) (isFinished ? 1 : 0));
     }
 
     @Override
