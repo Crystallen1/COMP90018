@@ -364,29 +364,43 @@ public class GPTService {
                 String mode =totalPlan.getMode();
                 int duration = totalPlan.getDuration();
 
+                Map<String, String> ModeDescription = new HashMap<>();
+                ModeDescription.put("Blitz", "I want to travel with a tight, fast-paced schedule where I can visit multiple attractions in a short amount of time.");
+                ModeDescription.put("Medium", "I want to travel with a reasonable amount of planning and rest time so I can find a balance between the number of attractions and the depth of their experiences.");
+                ModeDescription.put("Leisure", "I want to travel with a relaxing schedule so I can focus on rest and in-depth experiences.");
+
+
                 StringBuilder promptBuilder = new StringBuilder();
-                promptBuilder.append("Based on the following travel information, please recommend attraction numbers for tomorrow's visit.\n");
+                promptBuilder.append("This is the travel city, travel pace and travel duration I selected.\n");
                 promptBuilder.append("City: ").append(city).append("\n");
-                promptBuilder.append("Travel Method: ").append(mode).append("\n");
+                promptBuilder.append("Travel Method: ").append(ModeDescription.get(mode)).append("\n");
                 promptBuilder.append("Travel Duration: ").append(duration).append("\n");
+                promptBuilder.append("This is my visited attraction\n");
                 promptBuilder.append("Visited Attractions:\n");
                 for (Journey attraction : journeysViewed) {
                     promptBuilder.append("  - ")
                             .append(": ").append(attraction).append("\n");
                 }
+                promptBuilder.append("This is my feedback on yesterday's trip:\n");
                 promptBuilder.append("Yesterday's Step Count: ").append(stepCount).append("\n");
                 promptBuilder.append("Satisfaction Level: ").append(satisfaction).append("\n");
                 promptBuilder.append("Tiredness Level: ").append(tiredLevel).append("\n");
                 promptBuilder.append("Additional Feedback: ").append(feedback).append("\n");
+                promptBuilder.append("These are attractions I am interested in, including both visited and not visited.\n");
                 promptBuilder.append("Desired Attractions (including those visited yesterday):\n");
 
                 for (Map.Entry<String, Journey> attraction : targetPlaceMap.entrySet()) {
-                    promptBuilder.append("  - ").append("Attraction ").append(attraction.getKey())
-                            .append(": ").append(attraction.getValue()).append("\n");
+                    promptBuilder.append("  - ").append("Attraction ID:").append(attraction.getKey())
+                            .append(", Details: ").append(attraction.getValue()).append("\n");
+
                 }
 
-                promptBuilder.append("Please recommend the attraction numbers to visit tomorrow based on this information.");
-
+                promptBuilder.append("Please recommend the attraction numbers to visit tomorrow from the desired attractions which " +
+                        "not in the visited attractions list. The recommendation should be based on the additional feedback, " +
+                        "step counts, satisfaction level and desired Attractions. \n");
+                promptBuilder.append("Please return only the Attraction ID of desired attractions I need to visit on the next day. " +
+                        "Your response should only include the list of IDs, without additional explanations. " +
+                        "The format of response should belike 1,2,3");
                 // 构建消息数组
                 JSONArray messages = new JSONArray();
                 messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));
