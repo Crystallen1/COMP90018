@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
-        android:icon="@drawable/common_google_signin_btn_text_dark"
+        android:icon="@drawable/baseline_home_24"
         android:title="Home" />
     <item
         android:id="@+id/nav_map"
-        android:icon="@drawable/common_full_open_on_phone"
+        android:icon="@drawable/ic_search"
         android:title="Search" />
     <item
         android:id="@+id/nav_profile"
-        android:icon="@drawable/common_google_signin_btn_icon_dark_focused"
+        android:icon="@drawable/baseline_person_24"
         android:title="Profile" />
 </menu>
