@@ -86,6 +86,7 @@ public class PlanFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList("completedJourneys", getCompletedJourneys());
             //TODO: 带更多的数据到feedback去
+            // 至少包括之前的totalPlan和stepCount
             Navigation.findNavController(view).navigate(R.id.action_plan_to_feedback, bundle);
         } else {
             Toast.makeText(getContext(), "Please finish all journeys before ending the trip.", Toast.LENGTH_SHORT).show();

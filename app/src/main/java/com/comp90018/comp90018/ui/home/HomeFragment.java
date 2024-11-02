@@ -69,8 +69,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getContext(), "Create Trip Clicked", Toast.LENGTH_SHORT).show();
-                // TODO: 实现导航到 CreateTripFragment
-                // 例如：
+
                 navController.navigate(R.id.action_home_to_create_trip);
             }
         });
@@ -79,7 +78,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getContext(), "View All Clicked", Toast.LENGTH_SHORT).show();
-                // TODO: 实现导航到 ViewAllTripsFragment 或类似页面
                 loadFullPlan();
                 // 例如：
 //                Navigation.findNavController(view).navigate(R.id.fragment_create_trip);

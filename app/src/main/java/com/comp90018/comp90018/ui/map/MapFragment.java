@@ -301,8 +301,9 @@ public class MapFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null && bundle.getBoolean("showDialog", false)) {  // 检查标志
             String result = bundle.getString("result");
+            String imageUrl = bundle.getString("imageUrl");
             // 打开DialogFragment并传递数据
-            PhotoDialogFragment dialogFragment = PhotoDialogFragment.newInstance(result);
+            PhotoDialogFragment dialogFragment = PhotoDialogFragment.newInstance(result,imageUrl);
             dialogFragment.show(getChildFragmentManager(), "MyDialogFragment");
         }
     }
@@ -471,7 +472,6 @@ public class MapFragment extends Fragment {
         // 设置图片
         ImageView markerImage = markerView.findViewById(R.id.marker_image);
 
-        // TODO: 将来可以从数据库或网络获取 Journey 对象对应的图片
         // 目前，使用静态的统一图片进行展示
         markerImage.setImageResource(R.drawable.sample_image);
 

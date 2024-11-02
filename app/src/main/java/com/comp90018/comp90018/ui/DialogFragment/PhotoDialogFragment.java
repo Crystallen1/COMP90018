@@ -15,11 +15,13 @@ import com.comp90018.comp90018.R;
 
 public class PhotoDialogFragment extends DialogFragment {
     private String result;
+    private String imageUrl;
 
-    public static PhotoDialogFragment newInstance(String result) {
+    public static PhotoDialogFragment newInstance(String result, String imageUrl) {
         PhotoDialogFragment fragment = new PhotoDialogFragment();
         Bundle args = new Bundle();
         args.putString("result", result);
+        args.putString("imageUrl",imageUrl);
         fragment.setArguments(args);
         return fragment;
     }
@@ -31,10 +33,12 @@ public class PhotoDialogFragment extends DialogFragment {
 
         if (getArguments() != null) {
             result = getArguments().getString("result");
+            imageUrl = getArguments().getString("imageUrl");
         }
 
         ImageView imageView = view.findViewById(R.id.imageView);
         TextView textView = view.findViewById(R.id.textView);
+        //TODO:这里加入imageUrl里面的东西到imageview里面
         // 加载图片和文字，假设result包含文字并可以加载图片
         textView.setText(result);
         // imageView.setImageBitmap(...); // 根据你的实现加载图片

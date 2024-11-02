@@ -1,4 +1,3 @@
-// TODO: Add button and navigate to the desired fragment
 // Example:
 // Button weatherButton = view.findViewById(R.id.weather_button);
 // weatherButton.setOnClickListener(v -> {
@@ -8,7 +7,6 @@
 
 // fragment_xxx.xml
 // example for the button:
-// TODO: Add a button to trigger weather check in the XML layout file
 // Example (XML):
 // <Button
 //     android:id="@+id/weather_button"
