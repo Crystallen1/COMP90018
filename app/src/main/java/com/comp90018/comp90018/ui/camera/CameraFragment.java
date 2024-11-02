@@ -105,28 +105,43 @@ public class CameraFragment extends Fragment {
                                 gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude, new GPTService.GPTCallback() {
                                     @Override
                                     public void onSuccess(String result) {
-                                        imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
-                                            @Override
-                                            public void onSuccess() {
-                                                Log.d("CameraFragment", "success delete image from firebase");
-                                                Bundle bundle = new Bundle();
-                                                bundle.putString("result", result);  // 传递自定义对象
-                                                bundle.putBoolean("showDialog", true);  // 设置标志
+                                        Log.d("CameraFragment", "success delete image from firebase");
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("result", result);  // 传递自定义对象
+                                        bundle.putString("imageUrl",imageUrl);
+                                        bundle.putBoolean("showDialog", true);  // 设置标志
 
-                                                try {
-                                                    imageCaptureService.unbindPreviewAndCapture();
-                                                } catch (ExecutionException e) {
-                                                    throw new RuntimeException(e);
-                                                } catch (InterruptedException e) {
-                                                    throw new RuntimeException(e);
-                                                }
-                                                navController.navigate(R.id.action_camera_to_map,bundle);
-                                            }
-                                            @Override
-                                            public void onFailure(Exception e) {
-                                                Log.e("CameraFragment", "Error in delete image from firebase", e);
-                                            }
-                                        });
+                                        try {
+                                            imageCaptureService.unbindPreviewAndCapture();
+                                        } catch (ExecutionException e) {
+                                            throw new RuntimeException(e);
+                                        } catch (InterruptedException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                        navController.navigate(R.id.action_camera_to_map,bundle);
+
+//                                        imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
+//                                            @Override
+//                                            public void onSuccess() {
+//                                                Log.d("CameraFragment", "success delete image from firebase");
+//                                                Bundle bundle = new Bundle();
+//                                                bundle.putString("result", result);  // 传递自定义对象
+//                                                bundle.putBoolean("showDialog", true);  // 设置标志
+//
+//                                                try {
+//                                                    imageCaptureService.unbindPreviewAndCapture();
+//                                                } catch (ExecutionException e) {
+//                                                    throw new RuntimeException(e);
+//                                                } catch (InterruptedException e) {
+//                                                    throw new RuntimeException(e);
+//                                                }
+//                                                navController.navigate(R.id.action_camera_to_map,bundle);
+//                                            }
+//                                            @Override
+//                                            public void onFailure(Exception e) {
+//                                                Log.e("CameraFragment", "Error in delete image from firebase", e);
+//                                            }
+//                                        });
                                     }
                                     @Override
                                     public void onFailure(String error) {

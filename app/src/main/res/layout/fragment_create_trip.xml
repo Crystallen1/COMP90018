@@ -35,42 +35,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 开始日期标签 -->
-    <TextView
-        android:id="@+id/tv_start_date_label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/start_date"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/tvForgotPasswordTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <!-- 开始日期输入框 -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_start_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:boxBackgroundMode="none"
-        android:background="@drawable/rounded_edittext"
-        app:layout_constraintTop_toBottomOf="@id/tv_start_date_label"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editText_start_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:clickable="true"
-            android:inputType="none"
-            android:background="@null"
-            android:padding="12dp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
     <!-- 旅行标题标签 -->
     <TextView
         android:id="@+id/tv_trip_title_label"
