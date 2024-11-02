@@ -46,6 +46,7 @@ public class FeedbackFragment extends Fragment {
     private String todayDate;
     private ArrayList<String> todaysAttractions;  // その日のアトラクションを保持
     private ArrayList<String> upcomingPlans; // 表示はしないが保持しておく
+    private Integer stepCount;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -77,6 +78,8 @@ public class FeedbackFragment extends Fragment {
             todaysAttractions = bundle.getStringArrayList("todaysAttractions"); // その日のアトラクションを取得
             upcomingPlans = bundle.getStringArrayList("upcomingPlans");
 
+            stepCount = bundle.getInt("stepCount");
+
             // 渡されたアトラクション（upcomingPlans）をCheckBoxとして動的に追加する
             if (todaysAttractions != null) {
                 for (String attraction : todaysAttractions) {
@@ -98,17 +101,21 @@ public class FeedbackFragment extends Fragment {
         // Other Feedbackのテキストを取得
         String otherFeedback = etOtherFeedback.getText().toString().trim();
 
-        // 選択されたアトラクションを収集
-        List<String> selectedAttractions = new ArrayList<>();
-        for (int i = 0; i < attractionContainer.getChildCount(); i++) {
-            View child = attractionContainer.getChildAt(i);
-            if (child instanceof CheckBox) {
-                CheckBox checkBox = (CheckBox) child;
-                if (checkBox.isChecked()) {
-                    selectedAttractions.add(checkBox.getText().toString());
-                }
-            }
-        }
+        //
+
+
+        //没有这个功能
+//        // 選択されたアトラクションを収集
+//        List<String> selectedAttractions = new ArrayList<>();
+//        for (int i = 0; i < attractionContainer.getChildCount(); i++) {
+//            View child = attractionContainer.getChildAt(i);
+//            if (child instanceof CheckBox) {
+//                CheckBox checkBox = (CheckBox) child;
+//                if (checkBox.isChecked()) {
+//                    selectedAttractions.add(checkBox.getText().toString());
+//                }
+//            }
+//        }
 
         // TotalPlanのインスタンスを作成し、必要なデータをセット
         TotalPlan totalPlan = new TotalPlan();
@@ -119,19 +126,19 @@ public class FeedbackFragment extends Fragment {
 
         // Journeyオブジェクトを作成し、targetViewPointMapに追加
         Map<String, Journey> targetViewPointMap = new HashMap<>();
-        for (String attraction : selectedAttractions) {
-            Journey journey = new Journey();  // Journeyオブジェクトを作成
-            journey.setName(attraction);  // アトラクション名をセット
-            journey.setNotes("User visited this place.");  // 任意のメモをセット
-            // 緯度・経度などのデータがある場合は追加
-            journey.setLatitude(0.0);  // 仮の値
-            journey.setLongitude(0.0);  // 仮の値
-            targetViewPointMap.put(attraction, journey);  // Mapに追加
-        }
+//        for (String attraction : selectedAttractions) {
+//            Journey journey = new Journey();  // Journeyオブジェクトを作成
+//            journey.setName(attraction);  // アトラクション名をセット
+//            journey.setNotes("User visited this place.");  // 任意のメモをセット
+//            // 緯度・経度などのデータがある場合は追加
+//            journey.setLatitude(0.0);  // 仮の値
+//            journey.setLongitude(0.0);  // 仮の値
+//            targetViewPointMap.put(attraction, journey);  // Mapに追加
+//        }
         totalPlan.setTargetViewPoint(targetViewPointMap);  // TotalPlanにセット
 
         // GPTリクエストの呼び出し
-        GPTService.getInstance().getDayJourneyPlan(totalPlan, new GPTService.GPTCallback() {
+        GPTService.getInstance().getDayJourneyPlanByFeedback(totalPlan,enjoyment,tirednessLevel, otherFeedback,stepCount, new GPTService.GPTCallback() {
             @Override
             public void onSuccess(String result) {
                 // GPTからの結果をUIに反映

@@ -108,6 +108,8 @@ import com.comp90018.comp90018.service.GPTService;
 import com.comp90018.comp90018.service.ViewpointService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

@@ -27,6 +27,7 @@ import com.comp90018.comp90018.ui.login.RegisterFragment;
 import com.comp90018.comp90018.ui.map.MapFragment;
 
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -81,66 +82,78 @@ public class CameraFragment extends Fragment {
 
         // 设置拍照按钮事件
         View captureButton = view.findViewById(R.id.captureButton);
-        captureButton.setOnClickListener(v -> {
-            // Capture the photo
-            imageCaptureService.takePicture(requireContext(), new ImageCaptureService.PhotoCallback() {
-                @Override
-                public void onPhotoSaved(File photoFile) {
-                    // Upload the image after it's saved
-                    imageUploadService.uploadImageToFirebase(photoFile, new ImageUploadService.UploadCallback() {
-                        @Override
-                        public void onSuccess(String imageUrl) {
-                            // Now pass the image URL to GPT to get a journey introduction
-                            locationService.getCurrentLocation(new LocationService.LocationCallback() {
-                                @Override
-                                public void onLocationResult(Location location) {
-                                    double latitude = location.getLatitude();
-                                    double longitude = location.getLongitude();
+        captureButton.setOnClickListener(v -> getSuggestionByPhoto() );
+    }
 
-                                    GPTService gptService = GPTService.getInstance();
-                                    gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude, new GPTService.GPTCallback() {
-                                        @Override
-                                        public void onSuccess(String result) {
-                                            imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
-                                                @Override
-                                                public void onSuccess() {
-                                                    Log.d("CameraFragment", "success delete image from firebase");
+    public void  getSuggestionByPhoto(){
+        // Capture the photo
+        imageCaptureService.takePicture(requireContext(), new ImageCaptureService.PhotoCallback() {
+            @Override
+            public void onPhotoSaved(File photoFile) {
+                // Upload the image after it's saved
+                imageUploadService.uploadImageToFirebase(photoFile, new ImageUploadService.UploadCallback() {
+                    @Override
+                    public void onSuccess(String imageUrl) {
+                        // Now pass the image URL to GPT to get a journey introduction
+                        locationService.getCurrentLocation(new LocationService.LocationCallback() {
+                            @Override
+                            public void onLocationResult(Location location) {
+                                double latitude = location.getLatitude();
+                                double longitude = location.getLongitude();
 
-                                                    Log.d("CameraFragment", result);
+                                GPTService gptService = GPTService.getInstance();
+                                gptService.getImageBasedJourneyIntroduction(imageUrl, latitude, longitude, new GPTService.GPTCallback() {
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        imageUploadService.deleteImageFromFirebase(imageUrl, new ImageUploadService.DeleteCallback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Log.d("CameraFragment", "success delete image from firebase");
+                                                Bundle bundle = new Bundle();
+                                                bundle.putString("result", result);  // 传递自定义对象
+                                                bundle.putBoolean("showDialog", true);  // 设置标志
+
+                                                try {
+                                                    imageCaptureService.unbindPreviewAndCapture();
+                                                } catch (ExecutionException e) {
+                                                    throw new RuntimeException(e);
+                                                } catch (InterruptedException e) {
+                                                    throw new RuntimeException(e);
                                                 }
-                                                @Override
-                                                public void onFailure(Exception e) {
-                                                    Log.e("CameraFragment", "Error in delete image from firebase", e);
-                                                }
-                                            });
-                                        }
-                                        @Override
-                                        public void onFailure(String error) {
-                                            Log.e("CameraFragment", "Error in GPT request:"+error);
-                                            Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
+                                                navController.navigate(R.id.action_camera_to_map,bundle);
+                                            }
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                                Log.e("CameraFragment", "Error in delete image from firebase", e);
+                                            }
+                                        });
+                                    }
+                                    @Override
+                                    public void onFailure(String error) {
+                                        Log.e("CameraFragment", "Error in GPT request:"+error);
+                                        Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
 
-                                        }
-                                    });
-                                }
-                                @Override
-                                public void onLocationError(String errorMsg) {
+                                    }
+                                });
+                            }
+                            @Override
+                            public void onLocationError(String errorMsg) {
 
-                                }
-                            });
-                        }
+                            }
+                        });
+                    }
 
-                        @Override
-                        public void onFailure(Exception e) {
-                            Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
 
-                @Override
-                public void onError(Exception e) {
-                    Toast.makeText(requireContext(), "Photo capture failed", Toast.LENGTH_SHORT).show();
-                }
-            });
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(requireContext(), "Photo capture failed", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -150,15 +163,30 @@ public class CameraFragment extends Fragment {
     }
 
     private void navigateToMapFragment() {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        navController.navigate(R.id.action_camera_to_map);
+    }
 
-        // 创建 RegisterFragment 实例
-        MapFragment mapFragment = new MapFragment();
+    @Override
+    public void onPause() {
+        super.onPause();
+        try {
+            imageCaptureService.unbindPreviewAndCapture();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        // 替换当前 Fragment 并将其添加到返回栈
-        fragmentTransaction.replace(R.id.fragment_container, mapFragment);
-        fragmentTransaction.addToBackStack(null);  // 将 transaction 添加到返回栈
-        fragmentTransaction.commit();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            imageCaptureService.unbindPreviewAndCapture();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

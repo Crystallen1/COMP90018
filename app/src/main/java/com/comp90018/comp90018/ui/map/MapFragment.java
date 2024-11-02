@@ -44,6 +44,7 @@ import com.comp90018.comp90018.service.LocationService;
 import com.comp90018.comp90018.service.NavigationService;
 import com.comp90018.comp90018.service.StepCountService;
 import com.comp90018.comp90018.ui.DialogFragment.LocationInputDialogFragment;
+import com.comp90018.comp90018.ui.DialogFragment.PhotoDialogFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -271,6 +272,7 @@ public class MapFragment extends Fragment {
 
         navController = androidx.navigation.Navigation.findNavController(requireView());
 
+
         fabButton1 = view.findViewById(R.id.fab_button1);
         fabButton2 = view.findViewById(R.id.fab_button2);
         fabButton3 = view.findViewById(R.id.fab_button3);
@@ -296,6 +298,13 @@ public class MapFragment extends Fragment {
             // 可以添加与第三个按钮相关的逻辑
             Toast.makeText(getContext(), "Button 3 clicked", Toast.LENGTH_SHORT).show();
         });
+        Bundle bundle = getArguments();
+        if (bundle != null && bundle.getBoolean("showDialog", false)) {  // 检查标志
+            String result = bundle.getString("result");
+            // 打开DialogFragment并传递数据
+            PhotoDialogFragment dialogFragment = PhotoDialogFragment.newInstance(result);
+            dialogFragment.show(getChildFragmentManager(), "MyDialogFragment");
+        }
     }
 
     private void displayRoute(String origin, String destination) {

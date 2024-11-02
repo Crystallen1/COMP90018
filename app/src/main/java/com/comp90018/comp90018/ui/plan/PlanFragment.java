@@ -85,6 +85,7 @@ public class PlanFragment extends Fragment {
             Toast.makeText(getContext(), "Trip ended. Redirecting to feedback.", Toast.LENGTH_SHORT).show();
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList("completedJourneys", getCompletedJourneys());
+            //TODO: 带更多的数据到feedback去
             Navigation.findNavController(view).navigate(R.id.action_plan_to_feedback, bundle);
         } else {
             Toast.makeText(getContext(), "Please finish all journeys before ending the trip.", Toast.LENGTH_SHORT).show();

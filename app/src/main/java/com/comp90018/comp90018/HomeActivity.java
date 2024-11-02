@@ -25,6 +25,9 @@ import androidx.navigation.ui.NavigationUI;
 public class HomeActivity extends AppCompatActivity implements WeatherService.WeatherUpdateListener{
 
     private WeatherService weatherService;
+    // 定义一个变量记录上次显示Toast的时间
+    private long lastToastTime = 0;
+    private static final long TOAST_INTERVAL = 200000; // 设置时间间隔为2秒
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,15 @@ public class HomeActivity extends AppCompatActivity implements WeatherService.We
 
         // 推奨アクションを更新
         String recommendations = weatherService.generateRecommendations(temperature, humidity, pressure);
-        runOnUiThread(() -> Toast.makeText(getApplicationContext(), recommendations, Toast.LENGTH_SHORT).show());
+        showToast(recommendations);
+    }
+
+    private void showToast(String message) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastToastTime >= TOAST_INTERVAL) {
+            runOnUiThread(() -> Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show());
+            lastToastTime = currentTime;
+        }
     }
 
     @Override
