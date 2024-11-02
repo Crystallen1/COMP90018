@@ -398,7 +398,7 @@ public class GPTService {
                 promptBuilder.append("Please recommend the attraction numbers to visit tomorrow from the desired attractions which " +
                         "not in the visited attractions list. The recommendation should be based on the additional feedback, " +
                         "step counts, satisfaction level and desired Attractions. \n");
-                promptBuilder.append("\nPlease return only the Attraction ID of desired attractions I need to visit on the next day. " +
+                promptBuilder.append("Please return only the Attraction ID of desired attractions I need to visit on the next day. " +
                         "Your response should only include the list of IDs, without additional explanations. " +
                         "The format of response should belike 1,2,3");
                 // 构建消息数组
