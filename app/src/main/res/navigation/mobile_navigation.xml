@@ -52,6 +52,13 @@
         tools:layout="@layout/fragment_plan" />
 
     <fragment
+        android:id="@+id/navigation_user_profile"
+        android:name="com.comp90018.comp90018.ui.user.UserProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_user_profile" />
+
+
+    <fragment
         android:id="@+id/navigation_feedback"
         android:name="com.comp90018.comp90018.ui.feedback.FeedbackFragment"
         android:label="Feedback"
@@ -125,6 +132,17 @@
     <action
         android:id="@+id/action_attraction_detail_to_attraction"
         app:destination="@id/navigation_attraction" />
-
+    <action
+        android:id="@+id/action_home_to_user_profile"
+        app:destination="@id/navigation_user_profile" />
+    <action
+        android:id="@+id/action_map_to_user_profile"
+        app:destination="@id/navigation_user_profile" />
+    <action
+        android:id="@+id/action_user_profile_to_map"
+        app:destination="@id/navigation_map" />
+    <action
+        android:id="@+id/action_user_profile_to_home"
+        app:destination="@id/navigation_home" />
 
 </navigation>
