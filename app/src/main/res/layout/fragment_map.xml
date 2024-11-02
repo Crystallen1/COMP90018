@@ -11,31 +11,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 顶部左侧的日期显示 -->
-    <TextView
-        android:id="@+id/textView_date"
+    <!-- 顶部左侧的日期和步数模块 -->
+    <LinearLayout
+        android:id="@+id/date_steps_module"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_margin="16dp"
-        android:text="Date: 2024-10-09"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
-        android:background="@android:color/transparent"
-        android:gravity="center"
-        android:layout_gravity="top|start" />
+        android:padding="8dp"
+        android:background="#80000000"
+        android:layout_gravity="top|start">
 
-    <!-- 顶部右侧的步数显示 -->
-    <TextView
-        android:id="@+id/textView_step_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Steps: 0"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
-        android:background="@android:color/transparent"
-        android:gravity="center"
-        android:layout_gravity="top|end" />
+        <!-- 日期显示 -->
+        <TextView
+            android:id="@+id/textView_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date: 2024-10-09"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:gravity="center" />
+
+        <!-- 步数显示 -->
+        <TextView
+            android:id="@+id/textView_step_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Steps: 0"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
 
     <!-- 悬浮按钮的容器 -->
     <LinearLayout
@@ -52,7 +59,7 @@
             android:id="@+id/fab_button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/common_google_signin_btn_text_disabled"
+            android:src="@drawable/baseline_camera_alt_24"
             app:tint="@android:color/white"
             app:backgroundTint="@color/blue"
             android:contentDescription="Camera" />
@@ -62,23 +69,11 @@
             android:id="@+id/fab_button2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/common_google_signin_btn_icon_dark_focused"
+            android:src="@drawable/baseline_route_24"
             app:tint="@android:color/white"
             app:backgroundTint="@color/blue"
             android:layout_marginTop="16dp"
             android:contentDescription="Input Route" />
-
-        <!-- 第三个悬浮按钮 -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_button3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/common_google_signin_btn_text_dark_focused"
-            app:tint="@android:color/white"
-            app:backgroundTint="@color/blue"
-            android:layout_marginTop="16dp"
-            android:contentDescription="Settings" />
-
     </LinearLayout>
 
     <!-- 底部的悬浮窗容器 -->

@@ -275,7 +275,6 @@ public class MapFragment extends Fragment {
 
         fabButton1 = view.findViewById(R.id.fab_button1);
         fabButton2 = view.findViewById(R.id.fab_button2);
-        fabButton3 = view.findViewById(R.id.fab_button3);
 
         // 调整按钮点击事件，确保逻辑与原始按钮匹配
         fabButton1.setOnClickListener(view1 -> navController.navigate(R.id.action_map_to_camera));
@@ -294,10 +293,7 @@ public class MapFragment extends Fragment {
             dialog.show(getChildFragmentManager(), "LocationInputDialog");
         });
 
-        fabButton3.setOnClickListener(v -> {
-            // 可以添加与第三个按钮相关的逻辑
-            Toast.makeText(getContext(), "Button 3 clicked", Toast.LENGTH_SHORT).show();
-        });
+
         Bundle bundle = getArguments();
         if (bundle != null && bundle.getBoolean("showDialog", false)) {  // 检查标志
             String result = bundle.getString("result");
