@@ -33,7 +33,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        android:layout_marginTop="8dp" />
 
     <!-- 旅行标题标签 -->
     <TextView
@@ -43,7 +44,7 @@
         android:text="What's the tour about?"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_start_date"
+        app:layout_constraintTop_toBottomOf="@id/tvForgotPasswordTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
@@ -136,7 +137,7 @@
             android:spinnerMode="dropdown" />
     </com.google.android.material.textfield.TextInputLayout>
 
-
+    <!-- 按钮容器 -->
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="0dp"

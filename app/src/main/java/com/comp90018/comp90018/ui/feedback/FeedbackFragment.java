@@ -89,9 +89,9 @@ public class FeedbackFragment extends Fragment {
         int tirednessLevel = radioGroupTiredness.getCheckedRadioButtonId();
         String otherFeedback = etOtherFeedback.getText().toString().trim();
 
-        // 创建并配置 TotalPlan 和目标地点 Map
-        Map<String, Journey> targetViewPointMap = new HashMap<>();
-        totalPlan.setTargetViewPoint(targetViewPointMap);
+        // 设置 TotalPlan 的 targetViewPointMap
+//        Map<String, Journey> targetViewPointMap = new HashMap<>();
+//        totalPlan.setTargetViewPoint(targetViewPointMap);
 
         GPTService.getInstance().getDayJourneyPlanByFeedback(totalPlan, enjoyment, tirednessLevel, otherFeedback, stepCount, new GPTService.GPTCallback() {
             @Override
@@ -122,7 +122,12 @@ public class FeedbackFragment extends Fragment {
                         });
 
                 Toast.makeText(getContext(), "Next day's plan: " + result, Toast.LENGTH_LONG).show();
-                navController.navigate(R.id.action_feedback_to_plan);
+
+                // 在 FeedbackFragment 中
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("totalPlan", totalPlan);  // 假设 totalPlan 已实现 Parcelable
+
+                navController.navigate(R.id.action_feedback_to_plan,bundle);
             }
 
             @Override

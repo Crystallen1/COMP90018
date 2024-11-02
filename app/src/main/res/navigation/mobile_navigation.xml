@@ -49,7 +49,17 @@
         android:id="@+id/navigation_plan"
         android:name="com.comp90018.comp90018.ui.plan.PlanFragment"
         android:label="Plan"
-        tools:layout="@layout/fragment_plan" />
+        tools:layout="@layout/fragment_plan">
+
+        <action
+            android:id="@+id/action_feedback_to_plan"
+            app:destination="@id/navigation_plan">
+            <argument
+                android:name="totalPlan"
+                app:argType="com.comp90018.comp90018.model.TotalPlan" />
+        </action>
+    </fragment>
+
 
     <fragment
         android:id="@+id/navigation_user_profile"
