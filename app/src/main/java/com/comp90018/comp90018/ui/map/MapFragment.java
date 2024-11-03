@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -17,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,11 +44,13 @@ import com.comp90018.comp90018.service.LocationService;
 import com.comp90018.comp90018.service.NavigationService;
 import com.comp90018.comp90018.service.StepCountService;
 import com.comp90018.comp90018.ui.DialogFragment.LocationInputDialogFragment;
+import com.comp90018.comp90018.ui.DialogFragment.PhotoDialogFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -65,7 +71,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
 public class MapFragment extends Fragment {
     private MapView mapView;
     private GoogleMap googleMap;
@@ -82,9 +87,8 @@ public class MapFragment extends Fragment {
     private CompletableFuture<String> firebaseFuture;
     private Polyline currentPolyline;
 
-
     private ArrayList<Journey> journeys = new ArrayList<>(); // 地理位置列表
-    private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
+    // private HashMap<Marker, String> markerInfoMap = new HashMap<>(); // 保存每个Marker对应的信息
     GPTService gptService = GPTService.getInstance();
 
     private BroadcastReceiver stepCountReceiver = new BroadcastReceiver() {
@@ -98,9 +102,19 @@ public class MapFragment extends Fragment {
         }
     };
 
+    // 新添加的成员变量
+    private LinearLayout floatingInfoWindow;
+    private TextView placeNameTextView;
+    private TextView visitDurationTextView;
+    private Button navigationButton;
+    private Button detailButton;
+
+    private Journey selectedJourney; // 当前选中的景点
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -130,9 +144,10 @@ public class MapFragment extends Fragment {
                             }
                         }
                     }
-                    Log.d("MapFragment",String.valueOf(journeySet.size()));
+                    Log.d("MapFragment", String.valueOf(journeySet.size()));
                     journeys.addAll(journeySet);
-                    journeys.add(new Journey("Flinders station","I hope play around this station about 2 hours",-37.8136, 144.9631)); // 墨尔本
+                    journeys.add(new Journey("Flinders station",
+                            "I hope play around this station about 2 hours", -37.8136, 144.9631)); // 墨尔本
                     firebaseFuture.complete("success");
                 },
                 e -> {
@@ -178,31 +193,72 @@ public class MapFragment extends Fragment {
                 }
                 // 开始更新位置
                 updateLocationOnMap();
-                firebaseFuture.thenAccept(result->{
+                firebaseFuture.thenAccept(result -> {
                     addLocationsToMap();
                 }).exceptionally(throwable -> {
                     Log.e("MapFragment", throwable.getMessage());
                     return null;
                 });
                 // 设置点击 Marker 弹出信息窗口
-                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        // 弹出信息窗口
-                        String info = markerInfoMap.get(marker);
-                        if (info != null) {
-                            showInfoWindow(marker, info);
-                        }
-                        return false;  // 返回 false 以继续显示默认的 InfoWindow
+                // googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                //     @Override
+                //     public boolean onMarkerClick(Marker marker) {
+                //         // 弹出信息窗口
+                //         String info = markerInfoMap.get(marker);
+                //         if (info != null) {
+                //             showInfoWindow(marker, info);
+                //         }
+                //         return false;  // 返回 false 以继续显示默认的 InfoWindow
+                //     }
+                // });
+
+                // 修改后的 Marker 点击事件
+                googleMap.setOnMarkerClickListener(marker -> {
+                    Journey journey = (Journey) marker.getTag();
+                    if (journey != null) {
+                        selectedJourney = journey;
+
+                        // 设置悬浮窗内容
+                        placeNameTextView.setText(journey.getName());
+                        visitDurationTextView.setText("Approximate Visit Time: " + journey.getNotes());
+
+                        // 显示悬浮窗
+                        floatingInfoWindow.setVisibility(View.VISIBLE);
                     }
+                    return true; // 返回 true 表示消费了点击事件
                 });
-//                displayRoute("Sydney", "Melbourne");
+
+                // 当点击地图其他地方时，隐藏悬浮窗
+                googleMap.setOnMapClickListener(latLng -> {
+                    floatingInfoWindow.setVisibility(View.GONE);
+                });
+
             }
         });
 
         // 初始化位置服务
         locationService = new LocationService(requireContext());
         Log.d("MapFragment", "LocationService initialized");
+
+        // 初始化悬浮窗组件
+        floatingInfoWindow = rootView.findViewById(R.id.floating_info_window);
+        placeNameTextView = rootView.findViewById(R.id.place_name);
+        visitDurationTextView = rootView.findViewById(R.id.visit_duration);
+        navigationButton = rootView.findViewById(R.id.button_navigation);
+        detailButton = rootView.findViewById(R.id.button_detail);
+
+        // 设置按钮点击事件
+        navigationButton.setOnClickListener(v -> {
+            if (selectedJourney != null) {
+                displayRouteFromCurrentLocation(selectedJourney);
+            }
+        });
+
+        detailButton.setOnClickListener(v -> {
+            if (selectedJourney != null) {
+                showDetailInfo(selectedJourney);
+            }
+        });
 
         return rootView;
     }
@@ -214,25 +270,38 @@ public class MapFragment extends Fragment {
         Intent intent = new Intent(requireContext(), StepCountService.class);
         requireContext().startService(intent);
 
-        navController= androidx.navigation.Navigation.findNavController(requireView());
+        navController = androidx.navigation.Navigation.findNavController(requireView());
+
 
         fabButton1 = view.findViewById(R.id.fab_button1);
         fabButton2 = view.findViewById(R.id.fab_button2);
-        fabButton3 = view.findViewById(R.id.fab_button3);
 
+        // 调整按钮点击事件，确保逻辑与原始按钮匹配
         fabButton1.setOnClickListener(view1 -> navController.navigate(R.id.action_map_to_camera));
+
+        // 修改 fabButton2 的点击事件，打开输入对话框
         fabButton2.setOnClickListener(v -> {
             LocationInputDialogFragment dialog = new LocationInputDialogFragment();
 
             // 设置数据回调监听器
             dialog.setOnLocationSetListener((startLocation, endLocation) -> {
                 // 更新UI，显示用户输入的起点和终点
-                displayRoute(startLocation,endLocation);
+                displayRoute(startLocation, endLocation);
             });
 
             // 显示对话框
             dialog.show(getChildFragmentManager(), "LocationInputDialog");
         });
+
+
+        Bundle bundle = getArguments();
+        if (bundle != null && bundle.getBoolean("showDialog", false)) {  // 检查标志
+            String result = bundle.getString("result");
+            String imageUrl = bundle.getString("imageUrl");
+            // 打开DialogFragment并传递数据
+            PhotoDialogFragment dialogFragment = PhotoDialogFragment.newInstance(result,imageUrl);
+            dialogFragment.show(getChildFragmentManager(), "MyDialogFragment");
+        }
     }
 
     private void displayRoute(String origin, String destination) {
@@ -260,6 +329,47 @@ public class MapFragment extends Fragment {
             @Override
             public void onFailure(Exception e) {
                 // 处理错误
+                Log.e("MapFragment", "Failed to get directions", e);
+            }
+        });
+    }
+
+
+    private void displayRouteFromCurrentLocation(Journey journey) {
+        if (currentLocationMarker == null) {
+            Toast.makeText(getContext(), "Current location not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        LatLng currentLocation = currentLocationMarker.getPosition();
+        LatLng destination = new LatLng(journey.getLatitude(), journey.getLongitude());
+
+        // 清除上一次的路线
+        if (currentPolyline != null) {
+            currentPolyline.remove();
+        }
+
+        String origin = currentLocation.latitude + "," + currentLocation.longitude;
+        String dest = destination.latitude + "," + destination.longitude;
+
+        navigationService.getDirections(origin, dest, new NavigationService.DirectionsCallback() {
+            @Override
+            public void onSuccess(Navigation routes) {
+                getActivity().runOnUiThread(() -> {
+                    PolylineOptions polylineOptions = new PolylineOptions()
+                            .color(Color.BLUE)
+                            .width(10);
+                    for (NavigationStep route : routes.getNavigationSteps()) {
+                        for (LatLng point : route.getRoutes()) {
+                            polylineOptions.add(point);
+                        }
+                    }
+                    currentPolyline = googleMap.addPolyline(polylineOptions);
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
                 Log.e("MapFragment", "Failed to get directions", e);
             }
         });
@@ -308,40 +418,92 @@ public class MapFragment extends Fragment {
             }
         });
     }
+
     // 将位置添加到地图上
     private void addLocationsToMap() {
         Log.d("MapFragment", String.valueOf(journeys.size()));
-        for (int i = 0; i < journeys.size(); i++) {
+        for (Journey journey : journeys) {
             // 创建局部变量，防止闭包问题
-            final LatLng location = new LatLng(journeys.get(i).getLatitude(), journeys.get(i).getLongitude());
-            final String name = journeys.get(i).getName();
-            final String notes = journeys.get(i).getNotes();
-            Log.d("MapFragment","Latitude"+journeys.get(i).getLatitude()+"Longitude"+journeys.get(i).getLongitude());
-            Log.d("MapFragment","name"+journeys.get(i).getName());
-            Log.d("MapFragment","notes"+journeys.get(i).getNotes());
+            final LatLng location = new LatLng(journey.getLatitude(), journey.getLongitude());
+            final String name = journey.getName();
+            final String notes = journey.getNotes();
 
+            // 检查是否已缓存介绍
             if (mapViewModel.hasIntroduction(name)) {
                 // 如果 ViewModel 已经缓存了介绍，则直接使用
                 String cachedIntroduction = mapViewModel.getIntroduction(name);
-                addMarkerWithInfo(location, name, cachedIntroduction);
-            }else{
+                addMarkerWithInfo(location, journey, cachedIntroduction);
+            } else {
+                // 使用 GPTService 获取介绍
                 gptService.getJourneyIntroduction(name, notes, new GPTService.GPTCallback() {
                     @Override
                     public void onSuccess(String result) {
                         mapViewModel.addIntroduction(name, result);  // 缓存结果到 ViewModel
-                        addMarkerWithInfo(location, name, result);
-                        Log.d("GPTService","request gpt api success");
+                        addMarkerWithInfo(location, journey, result);
+                        Log.d("GPTService", "request gpt api success");
                     }
+
                     @Override
                     public void onFailure(String error) {
                         Log.e("GPTService", "Failed to generate introduction: " + error);
                         // 或者显示一个 Toast 提示用户
-                        Toast.makeText(requireContext(), "Failed to generate introduction", Toast.LENGTH_SHORT).show();                }
+                        Toast.makeText(requireContext(), "Failed to generate introduction", Toast.LENGTH_SHORT).show();
+                        // 即使获取介绍失败，也添加 Marker
+                        addMarkerWithInfo(location, journey, null);
+                    }
                 });
             }
         }
     }
 
+
+    // 新增方法：创建自定义的 Marker 图标
+    private Bitmap createCustomMarker(Journey journey) {
+        View markerView = LayoutInflater.from(getContext()).inflate(R.layout.custom_marker_layout, null);
+
+        // 设置名称
+        TextView markerName = markerView.findViewById(R.id.marker_name);
+        markerName.setText(journey.getName());
+
+        // 设置图片
+        ImageView markerImage = markerView.findViewById(R.id.marker_image);
+
+        // 目前，使用静态的统一图片进行展示
+        markerImage.setImageResource(R.drawable.sample_image);
+
+        // 测量并布局 View
+        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
+
+        // 创建 Bitmap
+        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        markerView.draw(canvas);
+
+        return bitmap;
+    }
+
+    private void addMarkerWithInfo(LatLng location, Journey journey, String info) {
+        // 创建自定义的 Marker 图标
+        BitmapDescriptor customIcon = BitmapDescriptorFactory.fromBitmap(createCustomMarker(journey));
+
+        Marker marker = googleMap.addMarker(new MarkerOptions()
+                .position(location)
+                .title(journey.getName())
+                .icon(customIcon));
+
+        marker.setTag(journey); // 将 Journey 对象绑定到 Marker
+
+        // 将介绍信息缓存到 MapViewModel 中
+        if (info != null) {
+            mapViewModel.addIntroduction(journey.getName(), info);
+        }
+    }
+
+
+    /*
+    // 原有方法，已注释
     private void addMarkerWithInfo(LatLng location, String name, String info) {
         Marker marker = googleMap.addMarker(new MarkerOptions()
                 .position(location)
@@ -349,7 +511,10 @@ public class MapFragment extends Fragment {
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
         markerInfoMap.put(marker, info);
     }
+    */
 
+    /*
+    // 原有方法，已注释
     // 显示自定义的信息窗口
     private void showInfoWindow(Marker marker, String info) {
         // 创建一个自定义布局
@@ -374,6 +539,38 @@ public class MapFragment extends Fragment {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+    */
+
+    // 新增方法：显示景点详细信息
+    private void showDetailInfo(Journey journey) {
+        String info = mapViewModel.getIntroduction(journey.getName());
+        if (info != null) {
+            // 创建一个自定义布局
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            View dialogView = inflater.inflate(R.layout.custom_info_window, null);
+
+            // 在自定义布局中设置文本内容
+            TextView infoTextView = dialogView.findViewById(R.id.info_text);
+            infoTextView.setText(info);
+
+            // 创建 AlertDialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setView(dialogView);
+
+            // 设置对话框标题
+            builder.setTitle(journey.getName());
+
+            // 添加关闭按钮
+            builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+
+            // 显示对话框
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else {
+            Toast.makeText(requireContext(), "No detail information available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     public void clearRoute() {
         if (currentPolyline != null) {

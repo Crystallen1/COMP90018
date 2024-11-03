@@ -1,44 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.map.MapFragment">
+    android:layout_height="match_parent">
 
     <!-- MapView 显示地图 -->
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <!-- 顶部的日期显示 -->
-    <TextView
-        android:id="@+id/textView_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:padding="16dp"
-        android:text="Date: 2024-10-09"
-    android:textSize="18sp"
-    android:textColor="@android:color/white"
-    android:background="@android:color/transparent"
-    android:gravity="center"/>
 
-    <TextView
-        android:id="@+id/textView_step_count"
+    <!-- 顶部左侧的日期和步数模块 -->
+    <LinearLayout
+        android:id="@+id/date_steps_module"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:padding="16dp"
-        android:layout_marginTop="60dp"
-    android:text="Steps: 0"
-    android:textSize="18sp"
-    android:textColor="@android:color/white"
-    android:background="@android:color/transparent"
-    android:gravity="center" />
+        android:orientation="vertical"
+        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:background="#80000000"
+        android:layout_gravity="top|start">
+
+        <!-- 日期显示 -->
+        <TextView
+            android:id="@+id/textView_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date: 2024-10-09"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:gravity="center" />
+
+        <!-- 步数显示 -->
+        <TextView
+            android:id="@+id/textView_step_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Steps: 0"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
 
     <!-- 悬浮按钮的容器 -->
     <LinearLayout
+        android:id="@+id/fab_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -51,32 +59,77 @@
             android:id="@+id/fab_button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/common_google_signin_btn_text_disabled"
+            android:src="@drawable/baseline_camera_alt_24"
             app:tint="@android:color/white"
             app:backgroundTint="@color/blue"
-            android:contentDescription="Button 1" />
+            android:contentDescription="Camera" />
 
         <!-- 第二个悬浮按钮 -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_button2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/common_google_signin_btn_icon_dark_focused"
+            android:src="@drawable/baseline_route_24"
             app:tint="@android:color/white"
             app:backgroundTint="@color/blue"
             android:layout_marginTop="16dp"
-            android:contentDescription="Button 2" />
+            android:contentDescription="Input Route" />
+    </LinearLayout>
 
-        <!-- 第三个悬浮按钮 -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_button3"
+    <!-- 底部的悬浮窗容器 -->
+    <LinearLayout
+        android:id="@+id/floating_info_window"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_corner_background"
+        android:padding="16dp"
+        android:layout_gravity="bottom"
+        android:visibility="gone">
+
+        <!-- 景点名称 -->
+        <TextView
+            android:id="@+id/place_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/common_google_signin_btn_text_dark_focused"
-            app:tint="@android:color/white"
-            app:backgroundTint="@color/blue"
-            android:layout_marginTop="16dp"
-            android:contentDescription="Button 3" />
+            android:text="Place Name"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- 大概的游览时间 -->
+        <TextView
+            android:id="@+id/visit_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Approximate Visit Time: 2 hours"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <!-- 按钮容器 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="16dp">
+
+            <!-- Navigation 按钮 -->
+            <Button
+                android:id="@+id/button_navigation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Navigation"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Detail 按钮 -->
+            <Button
+                android:id="@+id/button_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Detail" />
+        </LinearLayout>
     </LinearLayout>
 
 </FrameLayout>

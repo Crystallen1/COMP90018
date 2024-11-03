@@ -35,7 +35,7 @@ public class TabBarFragment extends Fragment {
             } else if (item.getItemId() == R.id.nav_map) {
                 navController.navigate(R.id.navigation_map);
             } else if (item.getItemId() == R.id.nav_profile) {
-                navController.navigate(R.id.navigation_home);
+                navController.navigate(R.id.navigation_user_profile);
             }
             return true;
         });

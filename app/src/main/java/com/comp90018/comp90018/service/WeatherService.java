@@ -5,6 +5,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
+
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class WeatherService implements SensorEventListener {
 
@@ -16,6 +21,9 @@ public class WeatherService implements SensorEventListener {
     private Float currentPressure;
 
     private WeatherUpdateListener weatherUpdateListener;
+
+    private Timer timer;
+    private final Random random = new Random();
 
     // コンストラクタ
     public WeatherService(Context context, WeatherUpdateListener listener) {
@@ -39,11 +47,36 @@ public class WeatherService implements SensorEventListener {
         if (pressureSensor != null) {
             sensorManager.registerListener(this, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
+
+//        timer = new Timer();
+//        timer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                generateRandomSensorData();
+//                Log.d("Weater","update");
+//            }
+//        }, 0, 1000);
+    }
+
+    private void generateRandomSensorData() {
+        currentTemperature = 10 + random.nextFloat() * 30;
+        currentHumidity = 20 + random.nextFloat() * 80;
+        currentPressure = 950 + random.nextFloat() * 100;
+        Log.d("Weater",currentTemperature.toString()+" "+currentHumidity.toString()+" "+currentPressure.toString());
+
+        // Fragmentに通知
+        if (weatherUpdateListener != null) {
+            weatherUpdateListener.onWeatherDataUpdated(currentTemperature, currentHumidity, currentPressure);
+        }
     }
 
     // センサーリスナーの解除
     public void stopSensorUpdates() {
         sensorManager.unregisterListener(this);
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 
     @Override

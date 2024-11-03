@@ -41,6 +41,7 @@ public class HomeFragment extends Fragment {
     private List<Trip> tripList;
     private NavController navController;
 
+    private boolean isFullPlanLoaded = false; // 追踪按钮的状态
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -62,87 +63,82 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        navController= Navigation.findNavController(requireView());
+        navController = Navigation.findNavController(requireView());
 
-        // 设置点击事件
+        // 设置创建按钮的点击事件
         buttonCreateTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getContext(), "Create Trip Clicked", Toast.LENGTH_SHORT).show();
-                // TODO: 实现导航到 CreateTripFragment
-                // 例如：
                 navController.navigate(R.id.action_home_to_create_trip);
             }
         });
 
+        // 设置查看全部按钮的点击事件
         buttonViewAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(), "View All Clicked", Toast.LENGTH_SHORT).show();
-                // TODO: 实现导航到 ViewAllTripsFragment 或类似页面
-                loadFullPlan();
-                // 例如：
-//                Navigation.findNavController(view).navigate(R.id.fragment_create_trip);
+                if (!isFullPlanLoaded) {
+                    // 加载完整计划
+                    Toast.makeText(getContext(), "Loading full plan...", Toast.LENGTH_SHORT).show();
+                    loadFullPlan();
+                    buttonViewAll.setText("Show Ongoing Plans"); // 更新按钮文本
+                } else {
+                    // 加载正在进行的计划
+                    Toast.makeText(getContext(), "Loading ongoing plans...", Toast.LENGTH_SHORT).show();
+                    setupRecyclerView(); // 调用初始设置方法，加载进行中的计划
+                    buttonViewAll.setText("View All Plans"); // 恢复按钮文本
+                }
+                isFullPlanLoaded = !isFullPlanLoaded; // 切换状态
             }
         });
     }
 
     /**
-     * 设置 RecyclerView
+     * 设置 RecyclerView，显示进行中的计划
      */
     private void setupRecyclerView() {
-        // 初始化旅行列表
         tripList = new ArrayList<>();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-// 获取数据并设置适配器
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // 当前用户ID
         FirebaseService.getInstance().getOngoingPlans(userId,
                 totalPlans -> {
-                    // 将获取到的 totalPlans 传递给适配器
                     tripAdapter = new TripAdapter(getContext(), totalPlans, new TripAdapter.OnItemClickListener() {
                         @Override
                         public void onItemClick(TotalPlan totalPlan) {
-                            // 处理点击事件
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("totalPlan", totalPlan);
-                            Navigation.findNavController(getView()).navigate(R.id.action_home_to_plan, bundle);
+                            navController.navigate(R.id.action_home_to_plan, bundle);
                         }
                     }, navController);
 
-                    // 设置布局管理器和适配器
                     recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
                     recyclerViewTrips.setAdapter(tripAdapter);
                 },
-                e -> {
-                    Log.w("PlanService", "Error getting documents", e);
-                });
+                e -> Log.w("PlanService", "Error getting documents", e));
     }
 
+    /**
+     * 加载全部计划
+     */
     private void loadFullPlan() {
-        // 初始化旅行列表
         tripList = new ArrayList<>();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-// 获取数据并设置适配器
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // 当前用户ID
         FirebaseService.getInstance().getAllTotalPlans(userId,
                 totalPlans -> {
-                    // 将获取到的 totalPlans 传递给适配器
                     tripAdapter = new TripAdapter(getContext(), totalPlans, new TripAdapter.OnItemClickListener() {
                         @Override
                         public void onItemClick(TotalPlan totalPlan) {
-                            // 处理点击事件
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("totalPlan", totalPlan);
-                            Navigation.findNavController(getView()).navigate(R.id.action_home_to_plan, bundle);
+                            navController.navigate(R.id.action_home_to_plan, bundle);
                         }
                     }, navController);
 
-                    // 设置布局管理器和适配器
                     recyclerViewTrips.setLayoutManager(new LinearLayoutManager(getContext()));
                     recyclerViewTrips.setAdapter(tripAdapter);
                 },
-                e -> {
-                    Log.w("PlanService", "Error getting documents", e);
-                });
+                e -> Log.w("PlanService", "Error getting documents", e));
     }
 }

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.comp90018.comp90018.model.DayPlan;
 import com.comp90018.comp90018.model.Journey;
 import com.comp90018.comp90018.model.TotalPlan;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -19,9 +20,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -260,8 +263,16 @@ public class GPTService {
                         .append(startDate)
                         .append(". The trip will last for ")
                         .append(duration)
-                        .append(" days, and I will be traveling as ")
-                        .append(mode)
+                        .append(" days, and ");
+                if(mode.equals("Leisure")){
+                    promptBuilder.append("I want to travel with a relaxing schedule so I can focus on rest and in-depth experiences.");
+                } else if (mode.equals("Medium")) {
+                    promptBuilder.append("I want to travel with a reasonable amount of planning and rest time so I can find a balance between the number of attractions and the depth of their experiences.");
+                }else if (mode.equals("Blitz")) {
+                    promptBuilder.append("I want to travel with a tight, fast-paced schedule where I can visit multiple attractions in a short amount of time");
+                }
+
+                promptBuilder
                         .append(". I have a list of potential places to visit, each with a unique identifier. ")
                         .append("Please recommend which places I should visit on the first day of my trip.\n\n");
                 promptBuilder.append("Here is the list of places, along with their unique identifiers:\n");
@@ -270,6 +281,126 @@ public class GPTService {
                 }
                 promptBuilder.append("\nPlease return only the place identifiers for the places I should visit on the first day. Your response should only include the list of IDs, without additional explanations.");
 
+                // 构建消息数组
+                JSONArray messages = new JSONArray();
+                messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));
+                messages.put(new JSONObject().put("role", "user").put("content", promptBuilder.toString()));
+
+                jsonRequest.put("messages", messages);
+                jsonRequest.put("max_tokens", 100);
+
+                RequestBody body = RequestBody.create(
+                        jsonRequest.toString(), MediaType.get("application/json; charset=utf-8"));
+
+                Request request = new Request.Builder()
+                        .url(API_URL)
+                        .post(body)
+                        .addHeader("Authorization", "Bearer " + API_KEY)
+                        .build();
+
+                // 发起异步请求
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        String errorMessage = getErrorMessage(e);
+                        // 在主线程中调用回调
+                        runOnUiThread(() -> callback.onFailure(errorMessage));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            runOnUiThread(() -> callback.onFailure("Unexpected code " + response));
+                            return;
+                        }
+
+                        try {
+                            // 处理 GPT 的返回结果
+                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONArray choicesArray = jsonResponse.getJSONArray("choices");
+
+                            if (choicesArray.length() > 0) {
+                                JSONObject firstChoice = choicesArray.getJSONObject(0);
+                                JSONObject messageObject = firstChoice.getJSONObject("message");
+                                if (messageObject.has("content")) {
+                                    String result = messageObject.getString("content").trim();
+                                    // 在主线程中调用成功回调
+                                    Log.d("GPTService",result);
+                                    runOnUiThread(() -> callback.onSuccess(result));
+                                } else {
+                                    runOnUiThread(() -> callback.onFailure("No 'content' field in the message object"));
+                                }
+                            } else {
+                                runOnUiThread(() -> callback.onFailure("Choices array is empty"));
+                            }
+                        } catch (JSONException e) {
+                            runOnUiThread(() -> callback.onFailure("JSON parsing error: " + e.getMessage()));
+                        }
+                    }
+                });}catch (Exception e){
+                Log.e(TAG, "JSON parsing/creation error: " + e.getMessage(), e);
+                callback.onFailure("Error generating journey introduction due to JSON error.");
+            }
+        }).exceptionally(throwable -> {
+            Log.e("GPTService",throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void getDayJourneyPlanByFeedback(TotalPlan totalPlan,int satisfaction,int tiredLevel, String feedback, int stepCount ,GPTCallback callback){
+        apiKeyFuture.thenAccept(apiKey->{
+            try {
+                JSONObject jsonRequest = new JSONObject();
+                jsonRequest.put("model", "gpt-3.5-turbo-0125");
+
+                Date startDate = totalPlan.getStartDate();
+                Map<String,Journey> targetPlaceMap = totalPlan.getTargetViewPoint();
+                List<DayPlan> dayPlan = totalPlan.getDayPlans();
+                List<Journey> journeysViewed = new ArrayList<>();
+                for (DayPlan dayPlan1 : dayPlan) {
+                    journeysViewed.addAll(dayPlan1.getJourneys());
+                }
+                String city = totalPlan.getCity();
+                String mode =totalPlan.getMode();
+                int duration = totalPlan.getDuration();
+
+                Map<String, String> ModeDescription = new HashMap<>();
+                ModeDescription.put("Blitz", "I want to travel with a tight, fast-paced schedule where I can visit multiple attractions in a short amount of time.");
+                ModeDescription.put("Medium", "I want to travel with a reasonable amount of planning and rest time so I can find a balance between the number of attractions and the depth of their experiences.");
+                ModeDescription.put("Leisure", "I want to travel with a relaxing schedule so I can focus on rest and in-depth experiences.");
+
+
+                StringBuilder promptBuilder = new StringBuilder();
+                promptBuilder.append("This is the travel city, travel pace and travel duration I selected.\n");
+                promptBuilder.append("City: ").append(city).append("\n");
+                promptBuilder.append("Travel Method: ").append(ModeDescription.get(mode)).append("\n");
+                promptBuilder.append("Travel Duration: ").append(duration).append("\n");
+                promptBuilder.append("This is my visited attraction\n");
+                promptBuilder.append("Visited Attractions:\n");
+                for (Journey attraction : journeysViewed) {
+                    promptBuilder.append("  - ")
+                            .append(": ").append(attraction).append("\n");
+                }
+                promptBuilder.append("This is my feedback on yesterday's trip:\n");
+                promptBuilder.append("Yesterday's Step Count: ").append(stepCount).append("\n");
+                promptBuilder.append("Satisfaction Level: ").append(satisfaction).append("\n");
+                promptBuilder.append("Tiredness Level: ").append(tiredLevel).append("\n");
+                promptBuilder.append("Additional Feedback: ").append(feedback).append("\n");
+                promptBuilder.append("These are attractions I am interested in, including both visited and not visited.\n");
+                promptBuilder.append("Desired Attractions (including those visited yesterday):\n");
+
+                for (Map.Entry<String, Journey> attraction : targetPlaceMap.entrySet()) {
+                    promptBuilder.append("  - ").append("Attraction ID:").append(attraction.getKey())
+                            .append(", Details: ").append(attraction.getValue()).append("\n");
+
+                }
+
+                promptBuilder.append("Please recommend the attraction numbers to visit tomorrow from the desired attractions which " +
+                        "not in the visited attractions list. The recommendation should be based on the additional feedback, " +
+                        "step counts, satisfaction level and desired Attractions. \n");
+                promptBuilder.append("Please return only the Attraction ID of desired attractions I need to visit on the next day. " +
+                        "Your response should only include the list of IDs, without additional explanations. " +
+                        "The format of response should belike 1,2,3");
                 // 构建消息数组
                 JSONArray messages = new JSONArray();
                 messages.put(new JSONObject().put("role", "system").put("content", "You are a helpful tourist guide."));

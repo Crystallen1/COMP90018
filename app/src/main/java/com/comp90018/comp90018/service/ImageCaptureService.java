@@ -2,6 +2,7 @@ package com.comp90018.comp90018.service;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.CameraSelector;
@@ -25,6 +26,7 @@ public class ImageCaptureService {
 
     private String currentPhotoPath;
     private ImageCapture imageCapture;
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
     public String getCurrentPhotoPath() {
         return currentPhotoPath;
@@ -36,7 +38,7 @@ public class ImageCaptureService {
 
     // 初始化 CameraX，并绑定预览和拍照功能
     public void startCamera(Context context, LifecycleOwner lifecycleOwner, PreviewView previewView) {
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
+        cameraProviderFuture = ProcessCameraProvider.getInstance(context);
 
         cameraProviderFuture.addListener(() -> {
             try {
@@ -58,6 +60,7 @@ public class ImageCaptureService {
         // 设置 ImageCapture 配置
         imageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setTargetResolution(new Size(320, 240)) // 设置较低的分辨率
                 .build();
 
         // 选择后置摄像头
@@ -67,6 +70,12 @@ public class ImageCaptureService {
 
         // 绑定生命周期
         cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture);
+    }
+    public void unbindPreviewAndCapture() throws ExecutionException, InterruptedException {
+        ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+        if (cameraProvider!=null){
+            cameraProvider.unbind();
+        }
     }
     // 拍照并保存图片
     public void takePicture(Context context, PhotoCallback callback) {

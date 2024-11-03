@@ -51,12 +51,6 @@ public class CreateTripFragment extends Fragment {
         // Set up click listener for the submit button
         binding.buttonNext.setOnClickListener(v -> submitTrip());
 
-        // Handle date range picker
-        binding.editTextStartDate.setOnClickListener(v -> {
-            // Handle date range picker logic here
-            Toast.makeText(requireContext(), "Date Range Picker Clicked", Toast.LENGTH_SHORT).show();
-        });
-
         // Handle location search box logic here, if needed
         binding.editTextLocation.setOnClickListener(v -> {
             // Handle location search logic here

@@ -1,26 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- custom_info_window.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- 信息内容 -->
     <TextView
         android:id="@+id/info_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Information about the place."
         android:textSize="16sp"
-        android:textColor="#000"
-        android:maxLines="8"
-        android:scrollbars="vertical"
-        android:layout_marginBottom="16dp" />
+        android:textColor="@android:color/black" />
 
-    <!-- 空余区域以便日后扩展 -->
-    <TextView
-        android:id="@+id/extra_space"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Extra space for expansion"
-        android:textSize="14sp"
-        android:textColor="#888" />
 </LinearLayout>
