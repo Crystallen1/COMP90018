@@ -37,7 +37,18 @@
         android:id="@+id/navigation_attraction"
         android:name="com.comp90018.comp90018.ui.attractions.AttractionsFragment"
         android:label="Attractions"
-        tools:layout="@layout/fragment_attractions" />
+        tools:layout="@layout/fragment_attractions">
+
+        <action
+            android:id="@+id/action_attractions_to_plan"
+            app:destination="@id/navigation_plan">
+            <argument
+                android:name="totalPlan"
+                app:argType="com.comp90018.comp90018.model.TotalPlan" />
+        </action>
+
+    </fragment>
+
 
     <fragment
         android:id="@+id/navigation_duration"
