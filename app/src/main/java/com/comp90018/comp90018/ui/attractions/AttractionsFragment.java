@@ -215,7 +215,11 @@ public class AttractionsFragment extends Fragment {
         });
 
         viewModel.updateLiveData(totalPlan);
-        navController.navigate(R.id.action_attraction_to_plan);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("totalPlan", totalPlan);  // 假设 totalPlan 已实现 Parcelable
+
+        navController.navigate(R.id.action_attractions_to_plan,bundle);
+
     }
 
     private void loadJourneys(String cityName) {
