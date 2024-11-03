@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -31,6 +32,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.comp90018.comp90018.R;
 import com.comp90018.comp90018.adapter.TripAdapter;
 import com.comp90018.comp90018.model.DayPlan;
@@ -485,21 +489,62 @@ public class MapFragment extends Fragment {
     }
 
     private void addMarkerWithInfo(LatLng location, Journey journey, String info) {
-        // 创建自定义的 Marker 图标
-        BitmapDescriptor customIcon = BitmapDescriptorFactory.fromBitmap(createCustomMarker(journey));
-
+        // 添加一个默认图标的 Marker，稍后再更新图标
         Marker marker = googleMap.addMarker(new MarkerOptions()
                 .position(location)
                 .title(journey.getName())
-                .icon(customIcon));
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))); // 默认图标
 
         marker.setTag(journey); // 将 Journey 对象绑定到 Marker
+
+        // 使用 Glide 加载 Journey 的 imageUrl
+        Glide.with(requireContext())
+                .asBitmap()
+                .load(journey.getImageUrl()) // 假设 Journey 对象有 getImageUrl() 方法
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        // 当图片加载完成时，创建自定义 Marker 图标
+                        BitmapDescriptor customIcon = BitmapDescriptorFactory.fromBitmap(createCustomMarkerWithBitmap(journey, resource));
+                        marker.setIcon(customIcon); // 更新 Marker 图标
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        // 如果需要，可在清除资源时进行处理
+                    }
+                });
 
         // 将介绍信息缓存到 MapViewModel 中
         if (info != null) {
             mapViewModel.addIntroduction(journey.getName(), info);
         }
     }
+
+    // 辅助方法：创建带有自定义图片的 Marker 图标
+    private Bitmap createCustomMarkerWithBitmap(Journey journey, Bitmap image) {
+        // 加载自定义的 Marker 布局
+        View markerView = LayoutInflater.from(getContext()).inflate(R.layout.custom_marker_layout, null);
+
+        // 设置 Marker 的名称
+        TextView markerName = markerView.findViewById(R.id.marker_name);
+        markerName.setText(journey.getName());
+
+        // 设置加载的图片
+        ImageView markerImage = markerView.findViewById(R.id.marker_image);
+        markerImage.setImageBitmap(image); // 使用 Glide 加载的图片
+
+        // 将自定义 View 转换为 Bitmap
+        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        markerView.draw(canvas);
+
+        return bitmap;
+    }
+
 
 
     /*
