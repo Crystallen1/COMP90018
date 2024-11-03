@@ -39,7 +39,9 @@ public class RegisterFragment  extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // 加载布局
         View view = inflater.inflate(R.layout.fragment_register, container, false);
 
@@ -58,6 +60,7 @@ public class RegisterFragment  extends Fragment {
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String email = etUseremail.getText().toString().trim();
                 String password = etPassword.getText().toString().trim();
 
@@ -74,9 +77,9 @@ public class RegisterFragment  extends Fragment {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            Toast.makeText(getActivity(), "Registration successful! Verification email sent.", Toast.LENGTH_SHORT).show();
+                                                            Toast.makeText(getActivity(), "Register successful!", Toast.LENGTH_SHORT).show();
                                                         } else {
-                                                            Toast.makeText(getActivity(), "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                                                            Toast.makeText(getActivity(), "send email", Toast.LENGTH_SHORT).show();
                                                         }
                                                     }
                                                 });
@@ -85,6 +88,7 @@ public class RegisterFragment  extends Fragment {
 
                                 @Override
                                 public void onFailure(String errorMessage) {
+                                    // 注册失败的处理（可选）
                                 }
                             })
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -93,14 +97,12 @@ public class RegisterFragment  extends Fragment {
                                     progressBar.setVisibility(View.GONE);
 
                                     if (task.isSuccessful()) {
-                                        // 注册成功的处理
-                                        // 登录成功后跳转到 MainActivity
-                                        Intent intent = new Intent(getActivity(), HomeActivity.class);
-                                        startActivity(intent);
-                                        getActivity().finish();
+                                        // 注册成功后导航回登录界面
+                                        Toast.makeText(getActivity(), "Register successful! Please login", Toast.LENGTH_SHORT).show();
+                                        navController.navigate(R.id.action_register_to_login);
                                     } else {
                                         // 注册失败的处理
-                                        Toast.makeText(getActivity(), "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getActivity(), "Failed to register" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
@@ -116,6 +118,6 @@ public class RegisterFragment  extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         navController = Navigation.findNavController(requireView());
 
-        btnBack.setOnClickListener(v-> navController.navigate(R.id.action_register_to_login));
+        btnBack.setOnClickListener(v -> navController.navigate(R.id.action_register_to_login));
     }
 }
